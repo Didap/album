@@ -287,7 +287,7 @@ function copyVal(k,c,mk){mk=mk||MK;const one=m=>{if(m==="ct"){const x=ctCopy(k,c
 function missVal(k,mk){mk=mk||MK;const one=m=>{if(m==="ct")return ctMiss(k);const p=priceOf(k,false,m);return p&&p.ref?{ref:p.ref,low:p.low??p.ref}:null};
  if(mk!=="all")return one(mk);const xs=["cm","tp","ct"].map(one).filter(x=>x);if(!xs.length)return null;return{ref:xs.reduce((a,b)=>a+b.ref,0)/xs.length,low:Math.min(...xs.map(x=>x.low))}}
 function totals(field,mk){let v=0,cmin=0,ctyp=0,priced=0,miss=0;mk=field?"cm":(mk||MK);
- for(const [s] of SETS)if(!NOPRICE.has(s))for(const r of DATA[s]){const k=s+":"+r[0],l=COLL[k]||[];
+ for(const [s] of SETS)if(!NOPRICE.has(s)||(!field&&(mk==="ct"||mk==="all")))for(const r of DATA[s]){const k=s+":"+r[0],l=COLL[k]||[];
   if(field){const p=priceOf(k,false,"cm");if(!p){miss++;continue}priced++;
    if(l.length){for(const c of l){const q=priceOf(k,c.r,"cm")||p;if(q[field])v+=q[field]*cmult(c)}}else if(p[field]){ctyp+=p[field];cmin+=p[field]}continue}
   if(l.length){let any=false;for(const c of l){const x=copyVal(k,c,mk);if(x){v+=x;any=true}}any?priced++:miss++}
@@ -295,7 +295,8 @@ function totals(field,mk){let v=0,cmin=0,ctyp=0,priced=0,miss=0;mk=field?"cm":(m
  return{v,cmin,ctyp,priced,miss}}
 /* CardTrader: prezzi per condizione e lingua */
 const CTC={"Mint":0,"Near Mint":1,"Slightly Played":2,"Moderately Played":3,"Played":4,"Heavily Played":5,"Poor":6};
-const CTSET={ecard1:/expedition/i,ecard2:/aquapolis/i,neo4:/neo destiny/i};
+const CTSET={ecard1:/expedition/i,ecard2:/aquapolis/i,neo4:/neo destiny/i,vend:/expansion sheet|vending/i};
+const nname=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 let CT={},CTTOK="";try{CT=JSON.parse(localStorage.getItem("album-ct-v1"))||{};CTTOK=localStorage.getItem("album-ct-token")||""}catch(e){}
 $("ctk").value=CTTOK?"••••••••":"";
 $("ctf").onsubmit=e=>{e.preventDefault();const v=$("ctk").value.trim();if(!v||v.startsWith("•"))return;CTTOK=v;try{localStorage.setItem("album-ct-token",v)}catch(e){}$("ctk").value="••••••••";$("ctmsg").textContent="Token salvato in questo browser."};
@@ -308,10 +309,11 @@ function propsOf(p){const h=p.properties_hash||p.properties||{};let lang="",rev=
 async function fetchCT(){if(!CTTOK)return null;const exps=await ctGet("/expansions");const out={};let n=0;
  for(const [s,re] of Object.entries(CTSET)){const ex=exps.find(e=>re.test(e.name)&&(e.game_id===5||/pok/i.test(JSON.stringify(e))))||exps.find(e=>re.test(e.name));if(!ex)continue;
   const bps=await ctGet("/blueprints/export?expansion_id="+ex.id),num={};
-  for(const b of bps){const fp=b.fixed_properties||{};const cn=fp.collector_number||fp.number||(b.version||"");if(cn)num[b.id]=normNum(cn)}
+  if(s==="vend"){const byName={};for(const r of DATA.vend)(byName[nname(r[1])]||(byName[nname(r[1])]=[])).push(r[0]);for(const b of bps){const ks=byName[nname(b.name)];if(ks)num[b.id]=ks}}
+  else for(const b of bps){const fp=b.fixed_properties||{};const cn=fp.collector_number||fp.number||(b.version||"");if(cn)num[b.id]=normNum(cn)}
   const prods=await ctGet("/marketplace/products?expansion_id="+ex.id);
-  for(const [bid,list] of Object.entries(prods)){const cn=num[bid];if(!cn)continue;const k=s+":"+cn;const acc=out[k]||(out[k]={});
-   for(const p of list){const {c,lang,rev}=propsOf(p);if(c==null)continue;const eurc=(p.price&&p.price.cents)||p.price_cents;if(!eurc)continue;const key=c+"|"+(lang||"?")+"|"+(rev?1:0);(acc[key]||(acc[key]=[])).push(eurc/100);n++}}}
+  for(const [bid,list] of Object.entries(prods)){const cns=num[bid];if(!cns)continue;for(const cn of [].concat(cns)){const k=s+":"+cn;const acc=out[k]||(out[k]={});
+   for(const p of list){const {c,lang,rev}=propsOf(p);if(c==null)continue;const eurc=(p.price&&p.price.cents)||p.price_cents;if(!eurc)continue;const key=c+"|"+(lang||"?")+"|"+(rev?1:0);(acc[key]||(acc[key]=[])).push(eurc/100);n++}}}}
  for(const k in out)for(const kk in out[k])out[k][kk]=out[k][kk].sort((a,b)=>a-b).slice(0,3);
  return{out,n}}
 const ctList=k=>{const m=CT[k];if(!m)return[];return Object.entries(m).map(([kk,v])=>{const [c,l,r]=kk.split("|");return{c:+c,l,r:r==="1",p:v}})};
@@ -391,7 +393,7 @@ function cmUrl(r){const m=CMS[cur];const q=`https://www.cardmarket.com/it/Pokemo
  return`https://www.cardmarket.com/it/Pokemon/Products/Singles/${m[0]}/${slug}-${code}${r[0]}${f?"?"+f:""}`}
 function prBlock(){if(!open)return"";const cm=PRICES[key(open[0])];const q=encodeURIComponent(`${open[1]} ${open[0]} ${SETS.find(s=>s[0]===cur)[1]}`);
  const links=`<a href="${esc(cmUrl(open))}" target="_blank" rel="noopener">Cardmarket${best(copies(open[0]))?" (tua lingua e condizione o meglio)":""}</a> · <a href="https://www.ebay.it/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">Venduti eBay.it</a> · <a href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">eBay.com</a>`;
- if(NOPRICE.has(cur))return`<div class="pr">Set giapponese: niente quotazione automatica.<br>${links}</div>`;
+ if(NOPRICE.has(cur)&&!ctList(key(open[0])).length)return`<div class="pr">Set giapponese: Cardmarket e TCGplayer non hanno prezzi automatici per questo set. Con il token CardTrader e "Valuta ora" compaiono i prezzi CardTrader.<br>${links}</div>`;
  if(!cm&&!ctList(key(open[0])).length)return`<div class="pr">Nessun prezzo: premi "Valuta ora".<br>${links}</div>`;
  const p=pickCM(cm&&cm.cm?cm.cm:cm,false)||{},pv=pickCM(cm&&cm.cm?cm.cm:cm,true),l=copies(open[0]),e=entry(key(open[0])),tp=e&&pickTP(e.tp,false);
  let h=`<div class="pr"><b>Prezzi</b> <small>(valore copie con: ${MK==="cm"?"Cardmarket":MK==="tp"?"TCGplayer":"tutti i mercati"})</small><div class="prg"><span>Riferimento</span><b>${eur(p.ref)}</b><span>Più basso in vendita</span><b>${eur(p.low)}</b><span>Media 1/7/30 gg</span><b>${eur(p.a1)} · ${eur(p.a7)} · ${eur(p.a30)}</b>${pv&&pv.ref&&pv.ref!==p.ref?`<span>Reverse</span><b>${eur(pv.ref)}</b>`:""}${tp?`<span>TCGplayer</span><b>${eur(tp.ref)} (min ${eur(tp.low)})</b>`:""}</div>`;
