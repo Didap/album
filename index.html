@@ -378,7 +378,9 @@ function prBlock(){if(!open)return"";const cm=PRICES[key(open[0])];const q=encod
  const p=pickCM(cm&&cm.cm?cm.cm:cm,false)||{},pv=pickCM(cm&&cm.cm?cm.cm:cm,true),l=copies(open[0]),e=entry(key(open[0])),tp=e&&pickTP(e.tp,false);
  let h=`<div class="pr"><b>Prezzi</b> <small>(valore copie con: ${MK==="cm"?"Cardmarket":MK==="tp"?"TCGplayer":"tutti i mercati"})</small><div class="prg"><span>Riferimento</span><b>${eur(p.ref)}</b><span>Più basso in vendita</span><b>${eur(p.low)}</b><span>Media 1/7/30 gg</span><b>${eur(p.a1)} · ${eur(p.a7)} · ${eur(p.a30)}</b>${pv&&pv.ref&&pv.ref!==p.ref?`<span>Reverse</span><b>${eur(pv.ref)}</b>`:""}${tp?`<span>TCGplayer</span><b>${eur(tp.ref)} (min ${eur(tp.low)})</b>`:""}</div>`;
  if(l.length)h+=`<div class="prg">${l.map((c,i)=>{const x=copyVal(key(open[0]),c),ce=ctCopy(key(open[0]),c);return`<span>Copia ${i+1} (${c.c}${c.l==="ita"?", ITA":""}${c.r?", rev":""})</span><b>${eur(x)}${MK==="ct"&&ce&&!ce.exact?" <small>(stima)</small>":""}</b>`}).join("")}</div>`;
- const L=ctList(key(open[0]));if(L.length){const cell=(ci,lg)=>{const xs=L.filter(x=>x.c===ci&&x.l===lg).flatMap(x=>x.p);return xs.length?eur(Math.min(...xs)):"—"};
+ const L=ctList(key(open[0]));const bc=best(l);if(L.length&&bc){const ci=CI[bc.c],lg=bc.l==="eng"?"en":"it";const xs=L.filter(x=>x.c<=ci&&x.l===lg).flatMap(x=>x.p);
+  h+=`<div class="prg"><span>CardTrader, minimo in ${bc.c} o meglio, ${lg==="it"?"ITA":"ENG"}</span><b>${xs.length?eur(Math.min(...xs)):"nessun annuncio"}</b></div>`}
+ if(L.length){const cell=(ci,lg)=>{const xs=L.filter(x=>x.c===ci&&x.l===lg).flatMap(x=>x.p);return xs.length?eur(Math.min(...xs)):"—"};
   h+=`<b>CardTrader, prezzo più basso</b><table class="ctt"><tr><th>Condizione</th><th>ITA</th><th>ENG</th></tr>${COND.map((c,i)=>`<tr><td>${c[0]}</td><td>${cell(i,"it")}</td><td>${cell(i,"en")}</td></tr>`).join("")}</table>`}
  return h+links+"</div>"}
 const pages=$("pages");
