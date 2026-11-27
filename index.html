@@ -151,6 +151,8 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-o
 .quote.open .qbody{display:block}
 .qsheet{display:none}.qback{display:none}
 .qbar{margin:10px 0 0}
+.ctrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 4px;font-size:14px}.ctrow label{font-weight:700}.ctrow input{font:inherit;font-size:16px;flex:1 1 220px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}.ctrow span{color:var(--mute)}
+.ctt{border-collapse:collapse;margin:6px 0;font-size:13px}.ctt td,.ctt th{padding:2px 8px;text-align:right;white-space:nowrap}.ctt th:first-child,.ctt td:first-child{text-align:left}
 .mkrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-bottom:6px;font-weight:700}
 @media(max-width:700px){
  .quote{position:sticky;top:0;z-index:5;border-radius:0 0 16px 16px;margin-inline:calc(-1*max(4vw,16px));border-inline:0;border-top:0;box-shadow:0 8px 18px -12px rgba(0,0,0,.4)}
@@ -187,7 +189,8 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-o
 <div class="qback" id="qback"></div>
 <div class="qbody" id="qbody" role="region" aria-label="Dettagli quotazione">
 <div class="qsheet"><h2>Quotazione</h2><button class="qx" id="qx" aria-label="Chiudi dettagli">✕</button></div>
-<div class="mkrow"><span>Mercati di riferimento</span><div class="seg" id="mk"><button data-m="all" aria-pressed="false">Tutti</button><button data-m="cm" aria-pressed="false">Cardmarket</button><button data-m="tp" aria-pressed="false">TCGplayer</button></div></div>
+<div class="mkrow"><span>Mercati di riferimento</span><div class="seg" id="mk"><button data-m="all" aria-pressed="false">Tutti</button><button data-m="cm" aria-pressed="false">Cardmarket</button><button data-m="tp" aria-pressed="false">TCGplayer</button><button data-m="ct" aria-pressed="false">CardTrader</button></div></div>
+<form class="ctrow" id="ctf"><label for="ctk">Token API CardTrader</label><input id="ctk" type="password" autocomplete="off" placeholder="Incollalo qui: resta solo in questo browser"><button class="tb" type="submit">Salva</button><button class="tb" type="button" id="ctdel">Rimuovi</button><span id="ctmsg" role="status"></span></form>
 <p class="qd" id="mknote"></p>
 <div class="kpis"><div class="kpi"><span>Valore della collezione</span><b id="kv">—</b><small id="kvs"></small></div>
 <div class="kpi"><span>Per completare (prezzi minimi)</span><b id="kc">—</b><small id="kcs"></small></div>
@@ -270,12 +273,46 @@ function priceOf(k,rev,mk){const e=entry(k);if(!e)return null;mk=mk||MK;const a=
  const refs=[a&&a.ref,b&&b.ref].filter(x=>x),lows=[a&&a.low,b&&b.low].filter(x=>x);if(!refs.length)return null;
  return{ref:refs.reduce((x,y)=>x+y)/refs.length,low:lows.length?Math.min(...lows):null,a7:a&&a.a7,a30:a&&a.a30,a1:a&&a.a1,trend:a&&a.trend}}
 function cmult(c){return(MUL[c.c]??1)*(c.l==="ita"?MUL.ITA:1)}
+function copyVal(k,c,mk){mk=mk||MK;const one=m=>{if(m==="ct"){const x=ctCopy(k,c);return x?x.v:null}const p=priceOf(k,c.r,m)||priceOf(k,false,m);return p&&p.ref?p.ref*cmult(c):null};
+ if(mk!=="all")return one(mk);const xs=["cm","tp","ct"].map(one).filter(x=>x);return xs.length?xs.reduce((a,b)=>a+b)/xs.length:null}
+function missVal(k,mk){mk=mk||MK;const one=m=>{if(m==="ct")return ctMiss(k);const p=priceOf(k,false,m);return p&&p.ref?{ref:p.ref,low:p.low??p.ref}:null};
+ if(mk!=="all")return one(mk);const xs=["cm","tp","ct"].map(one).filter(x=>x);if(!xs.length)return null;return{ref:xs.reduce((a,b)=>a+b.ref,0)/xs.length,low:Math.min(...xs.map(x=>x.low))}}
 function totals(field,mk){let v=0,cmin=0,ctyp=0,priced=0,miss=0;mk=field?"cm":(mk||MK);
  for(const [s] of SETS)for(const r of DATA[s]){const k=s+":"+r[0],l=COLL[k]||[];
-  if(!priceOf(k,false,mk)&&!priceOf(k,true,mk)){miss++;continue}priced++;
-  if(l.length){for(const c of l){const p=priceOf(k,c.r,mk)||priceOf(k,false,mk);const x=p&&(field?p[field]:p.ref);if(x)v+=x*cmult(c)}}
-  else{const p=priceOf(k,false,mk);const x=p&&(field?p[field]:p.ref);if(x)ctyp+=x;if(p)cmin+=(field?x:(p.low??p.ref))||0}}
+  if(field){const p=priceOf(k,false,"cm");if(!p){miss++;continue}priced++;
+   if(l.length){for(const c of l){const q=priceOf(k,c.r,"cm")||p;if(q[field])v+=q[field]*cmult(c)}}else if(p[field]){ctyp+=p[field];cmin+=p[field]}continue}
+  if(l.length){let any=false;for(const c of l){const x=copyVal(k,c,mk);if(x){v+=x;any=true}}any?priced++:miss++}
+  else{const m=missVal(k,mk);if(!m){miss++;continue}priced++;ctyp+=m.ref;cmin+=m.low}}
  return{v,cmin,ctyp,priced,miss}}
+/* CardTrader: prezzi per condizione e lingua */
+const CTC={"Mint":0,"Near Mint":1,"Slightly Played":2,"Moderately Played":3,"Played":4,"Heavily Played":5,"Poor":6};
+const CTSET={ecard1:/expedition/i,ecard2:/aquapolis/i,neo4:/neo destiny/i};
+let CT={},CTTOK="";try{CT=JSON.parse(localStorage.getItem("album-ct-v1"))||{};CTTOK=localStorage.getItem("album-ct-token")||""}catch(e){}
+$("ctk").value=CTTOK?"••••••••":"";
+$("ctf").onsubmit=e=>{e.preventDefault();const v=$("ctk").value.trim();if(!v||v.startsWith("•"))return;CTTOK=v;try{localStorage.setItem("album-ct-token",v)}catch(e){}$("ctk").value="••••••••";$("ctmsg").textContent="Token salvato in questo browser."};
+$("ctdel").onclick=()=>{CTTOK="";CT={};try{localStorage.removeItem("album-ct-token");localStorage.removeItem("album-ct-v1")}catch(e){}$("ctk").value="";$("ctmsg").textContent="Token rimosso.";showQ()};
+async function ctGet(p){const r=await fetch("https://api.cardtrader.com/api/v2"+p,{headers:{Authorization:"Bearer "+CTTOK}});if(r.status===401)throw new Error("token");if(!r.ok)throw new Error("http "+r.status);return r.json()}
+const normNum=s=>String(s||"").trim().replace(/^0+(?=\d)/,"").replace(/\/.*$/,"").toUpperCase();
+function propsOf(p){const h=p.properties_hash||p.properties||{};let lang="",rev=false,cond=h.condition;
+ for(const k in h){const v=h[k];if(/language/i.test(k))lang=String(v).toLowerCase();if(/reverse/i.test(k)&&v===true)rev=true;if(/foil|holo/i.test(k)&&v===true&&/reverse/i.test(k))rev=true}
+ return{c:CTC[cond],lang:lang.slice(0,2),rev}}
+async function fetchCT(){if(!CTTOK)return null;const exps=await ctGet("/expansions");const out={};let n=0;
+ for(const [s,re] of Object.entries(CTSET)){const ex=exps.find(e=>re.test(e.name)&&(e.game_id===5||/pok/i.test(JSON.stringify(e))))||exps.find(e=>re.test(e.name));if(!ex)continue;
+  const bps=await ctGet("/blueprints/export?expansion_id="+ex.id),num={};
+  for(const b of bps){const fp=b.fixed_properties||{};const cn=fp.collector_number||fp.number||(b.version||"");if(cn)num[b.id]=normNum(cn)}
+  const prods=await ctGet("/marketplace/products?expansion_id="+ex.id);
+  for(const [bid,list] of Object.entries(prods)){const cn=num[bid];if(!cn)continue;const k=s+":"+cn;const acc=out[k]||(out[k]={});
+   for(const p of list){const {c,lang,rev}=propsOf(p);if(c==null)continue;const eurc=(p.price&&p.price.cents)||p.price_cents;if(!eurc)continue;const key=c+"|"+(lang||"?")+"|"+(rev?1:0);(acc[key]||(acc[key]=[])).push(eurc/100);n++}}}
+ for(const k in out)for(const kk in out[k])out[k][kk]=out[k][kk].sort((a,b)=>a-b).slice(0,3);
+ return{out,n}}
+const ctList=k=>{const m=CT[k];if(!m)return[];return Object.entries(m).map(([kk,v])=>{const [c,l,r]=kk.split("|");return{c:+c,l,r:r==="1",p:v}})};
+function ctCopy(k,cp){const L=ctList(k);if(!L.length)return null;const ci=CI[cp.c],lg=cp.l==="eng"?"en":"it",rv=!!cp.r;
+ const best=f=>{const xs=L.filter(f).flatMap(x=>x.p).sort((a,b)=>a-b).slice(0,3);return xs.length?xs[(xs.length-1)>>1]:null};
+ let v=best(x=>x.c===ci&&x.l===lg&&x.r===rv);if(v)return{v,exact:true};
+ v=best(x=>x.c===ci&&x.l===lg);if(v)return{v,exact:false};
+ for(let d=1;d<7;d++)for(const c of [ci-d,ci+d]){if(c<0||c>6)continue;const w=best(x=>x.c===c&&x.l===lg);if(w){const r=(MUL[COND[ci][0]]||1)/(MUL[COND[c][0]]||1);return{v:w*r,exact:false}}}
+ v=best(x=>x.c===ci);if(v)return{v:v*(lg==="it"?MUL.ITA:1),exact:false};return null}
+function ctMiss(k){const L=ctList(k);if(!L.length)return null;const xs=L.flatMap(x=>x.p).sort((a,b)=>a-b);return{low:xs[0],ref:xs[Math.min(2,xs.length-1)>>0]}}
 async function getRate(){try{const r=await fetch("https://api.frankfurter.app/latest?from=USD&to=EUR");const j=await r.json();if(j.rates&&j.rates.EUR)return j.rates.EUR}catch(e){}return null}
 async function fetchAll(){const keys=[];for(const [s] of SETS)for(const r of DATA[s])keys.push([s,r[0]]);
  let done=0,fail=0;const out={},q=keys.slice();$("qbar").hidden=false;
@@ -283,11 +320,12 @@ async function fetchAll(){const keys=[];for(const [s] of SETS)for(const r of DAT
   done++;$("qbi").style.width=(done/keys.length*100).toFixed(1)+"%";$("go").textContent=`Controllo… ${done}/${keys.length}`}}
  await Promise.all(Array.from({length:10},worker));$("qbar").hidden=true;return{out,fail}}
 $("go").onclick=async()=>{const b=$("go");b.disabled=true;
- try{const rt=await getRate();if(rt){RATE=rt;try{localStorage.setItem("album-cambio-v1",String(rt))}catch(e){}}const {out,fail}=await fetchAll();if(!Object.keys(out).length)throw new Error("nessun prezzo");PRICES=out;try{localStorage.setItem(LSP,JSON.stringify(PRICES))}catch(e){}
-  const n=totals(null,"cm"),p1=totals("a1"),p7=totals("a7"),p30=totals("a30"),mkx={};for(const m of ["cm","tp","all"]){const t=totals(null,m);mkx[m]=[+t.v.toFixed(2),+t.cmin.toFixed(2),+t.ctyp.toFixed(2)]}
+ try{const rt=await getRate();if(rt){RATE=rt;try{localStorage.setItem("album-cambio-v1",String(rt))}catch(e){}}let ctmsg="";if(CTTOK){try{$("go").textContent="CardTrader…";const r=await fetchCT();if(r){CT=r.out;try{localStorage.setItem("album-ct-v1",JSON.stringify(CT))}catch(e){}ctmsg=`CardTrader: ${r.n} annunci letti.`}}catch(e){ctmsg=e.message==="token"?"CardTrader: token non valido.":"CardTrader non ha risposto."}}
+  const {out,fail}=await fetchAll();if(!Object.keys(out).length)throw new Error("nessun prezzo");PRICES=out;try{localStorage.setItem(LSP,JSON.stringify(PRICES))}catch(e){}
+  const n=totals(null,"cm"),p1=totals("a1"),p7=totals("a7"),p30=totals("a30"),mkx={};for(const m of ["cm","tp","ct","all"]){const t=totals(null,m);mkx[m]=[+t.v.toFixed(2),+t.cmin.toFixed(2),+t.ctyp.toFixed(2)]}
   CHECKS.push({t:new Date().toISOString(),v:+n.v.toFixed(2),cmin:+n.cmin.toFixed(2),ctyp:+n.ctyp.toFixed(2),mk:mkx,rate:RATE,own:Object.keys(COLL).length,miss:n.miss,
    h:{1:[+p1.v.toFixed(2),+p1.ctyp.toFixed(2)],7:[+p7.v.toFixed(2),+p7.ctyp.toFixed(2)],30:[+p30.v.toFixed(2),+p30.ctyp.toFixed(2)]}});
-  saveQ();$("qnote").textContent=fail?`${fail} carte senza prezzo su Cardmarket: non sono nei totali.`:""}
+  saveQ();const t=totals();$("qnote").textContent=[t.miss?`${t.miss} carte senza prezzo nel mercato scelto: non sono nei totali.`:"",ctmsg].filter(x=>x).join(" ")}
  catch(e){$("qnote").textContent="Controllo non riuscito: TCGdex non risponde. Riprova tra poco."}
  b.disabled=false;b.textContent="Valuta ora";showQ()};
 const cv=(c,i)=>c.mk&&c.mk[MK]?c.mk[MK][i]:(MK==="cm"?[c.v,c.cmin,c.ctyp][i]:null);
@@ -295,7 +333,7 @@ function saveQ(){try{localStorage.setItem(LSQ,JSON.stringify(CHECKS))}catch(e){}
 function delta(a,b){if(b==null||!a)return"";const d=a-b,p=b?d/b*100:0;return`<span class="${d>=0?"up":"down"}">${d>=0?"+":""}${eur(d)} (${p>=0?"+":""}${p.toFixed(1)}%)</span>`}
 function showQ(){const last=CHECKS[CHECKS.length-1],prev=CHECKS[CHECKS.length-2];
  if(last){$("when").textContent=`Controllata il ${dfmt(last.t)}`;
-  const live=Object.keys(PRICES).length?totals():null;
+  const live=Object.keys(PRICES).length||Object.keys(CT).length?totals():null;
   const lv=live?live.v:cv(last,0),pv=prev?cv(prev,0):null;
   $("kv").textContent=eur(lv);$("kvs").innerHTML=(pv!=null?`dal controllo precedente ${delta(lv,pv)}`:MK==="cm"?`30 giorni fa circa ${eur(last.h[30][0])} ${delta(lv,last.h[30][0])}`:"");
   $("qsv").textContent=eur(lv);$("qsc").textContent=eur(live?live.cmin:cv(last,1));
@@ -303,7 +341,7 @@ function showQ(){const last=CHECKS[CHECKS.length-1],prev=CHECKS[CHECKS.length-2]
   $("kt").textContent=eur(live?live.ctyp:cv(last,2));$("kts").textContent="somma dei prezzi di riferimento delle carte mancanti"}
  $("hist").innerHTML=CHECKS.slice().reverse().map(c=>`<li><span>${dfmt(c.t)}</span><b>${eur(cv(c,0))} · completare ${eur(cv(c,1))}</b></li>`).join("");
  document.querySelectorAll("#mk button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===MK));
- $("mknote").textContent=MK==="cm"?"Prezzi Cardmarket in euro, con storico a 7 e 30 giorni.":MK==="tp"?`Prezzi TCGplayer (mercato USA) convertiti in euro${RATE?` a ${RATE.toFixed(4)} €/$`:""}. Nessuno storico precedente: il grafico usa solo i tuoi controlli.`:`Media tra Cardmarket e TCGplayer${RATE?` (cambio ${RATE.toFixed(4)} €/$)`:""}. Il grafico usa solo i tuoi controlli.`;
+ $("mknote").textContent=MK==="cm"?"Prezzi Cardmarket in euro, con storico a 7 e 30 giorni.":MK==="tp"?`Prezzi TCGplayer (mercato USA) convertiti in euro${RATE?` a ${RATE.toFixed(4)} €/$`:""}. Nessuno storico precedente: il grafico usa solo i tuoi controlli.`:MK==="ct"?(CTTOK?"Prezzi CardTrader per condizione e lingua di ogni copia (mediana dei 3 annunci più economici). Se manca la stessa combinazione, uso la condizione più vicina.":"Per CardTrader inserisci il tuo token API qui sotto e premi Valuta ora."):`Media dei mercati disponibili (Cardmarket, TCGplayer${CTTOK?", CardTrader":""})${RATE?`, cambio ${RATE.toFixed(4)} €/$`:""}. Il grafico usa solo i tuoi controlli.`;
  $("mults").innerHTML=Object.keys(DEFM).map(k=>`<label>${k==="ITA"?"Copia italiana":k} ×<input type="number" step="0.05" min="0" max="3" data-m="${k}" value="${MUL[k]}"></label>`).join("");
  draw()}
 $("mults").addEventListener("change",e=>{const k=e.target.dataset.m;if(!k)return;const v=parseFloat(e.target.value);if(!(v>=0))return;MUL[k]=v;try{localStorage.setItem(LSM,JSON.stringify(MUL))}catch(e){}showQ()});
@@ -336,10 +374,12 @@ function draw(){const W=chart.clientWidth,H=chart.clientHeight;if(!W)return;cons
 const ro=new ResizeObserver(draw);ro.observe($("fig"));
 function prBlock(){if(!open)return"";const cm=PRICES[key(open[0])];const q=encodeURIComponent(`${open[1]} ${open[0]} ${SETS.find(s=>s[0]===cur)[1]}`);
  const links=`<a href="https://www.cardmarket.com/it/Pokemon/Products/Search?searchString=${encodeURIComponent(open[1])}" target="_blank" rel="noopener">Cardmarket</a> · <a href="https://www.ebay.it/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">Venduti eBay.it</a> · <a href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">eBay.com</a>`;
- if(!cm)return`<div class="pr">Nessun prezzo: premi "Valuta ora".<br>${links}</div>`;
+ if(!cm&&!ctList(key(open[0])).length)return`<div class="pr">Nessun prezzo: premi "Valuta ora".<br>${links}</div>`;
  const p=pickCM(cm&&cm.cm?cm.cm:cm,false)||{},pv=pickCM(cm&&cm.cm?cm.cm:cm,true),l=copies(open[0]),e=entry(key(open[0])),tp=e&&pickTP(e.tp,false);
  let h=`<div class="pr"><b>Prezzi</b> <small>(valore copie con: ${MK==="cm"?"Cardmarket":MK==="tp"?"TCGplayer":"tutti i mercati"})</small><div class="prg"><span>Riferimento</span><b>${eur(p.ref)}</b><span>Più basso in vendita</span><b>${eur(p.low)}</b><span>Media 1/7/30 gg</span><b>${eur(p.a1)} · ${eur(p.a7)} · ${eur(p.a30)}</b>${pv&&pv.ref&&pv.ref!==p.ref?`<span>Reverse</span><b>${eur(pv.ref)}</b>`:""}${tp?`<span>TCGplayer</span><b>${eur(tp.ref)} (min ${eur(tp.low)})</b>`:""}</div>`;
- if(l.length)h+=`<div class="prg">${l.map((c,i)=>{const x=priceOf(key(open[0]),c.r)||priceOf(key(open[0]),false);return`<span>Copia ${i+1} (${c.c}${c.l==="ita"?", ITA":""}${c.r?", rev":""})</span><b>${eur(x&&x.ref?x.ref*cmult(c):null)}</b>`}).join("")}</div>`;
+ if(l.length)h+=`<div class="prg">${l.map((c,i)=>{const x=copyVal(key(open[0]),c),ce=ctCopy(key(open[0]),c);return`<span>Copia ${i+1} (${c.c}${c.l==="ita"?", ITA":""}${c.r?", rev":""})</span><b>${eur(x)}${MK==="ct"&&ce&&!ce.exact?" <small>(stima)</small>":""}</b>`}).join("")}</div>`;
+ const L=ctList(key(open[0]));if(L.length){const cell=(ci,lg)=>{const xs=L.filter(x=>x.c===ci&&x.l===lg).flatMap(x=>x.p);return xs.length?eur(Math.min(...xs)):"—"};
+  h+=`<b>CardTrader, prezzo più basso</b><table class="ctt"><tr><th>Condizione</th><th>ITA</th><th>ENG</th></tr>${COND.map((c,i)=>`<tr><td>${c[0]}</td><td>${cell(i,"it")}</td><td>${cell(i,"en")}</td></tr>`).join("")}</table>`}
  return h+links+"</div>"}
 const pages=$("pages");
 function counts(s){return DATA[s].filter(r=>(COLL[s+":"+r[0]]||[]).length).length}
