@@ -139,6 +139,29 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-o
 .pr{margin-top:12px;border-top:1px solid rgba(255,255,255,.14);padding-top:12px;font-size:14px;color:#c9cede}
 .pr b{color:#fff}.pr a{color:#9fd3ff}
 .prg{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:6px 0}
+
+.quote{padding:12px 16px}
+.qsum{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.qst{flex:1 1 180px}.qst h2{font:700 20px "Chakra Petch",sans-serif;margin:0}
+.qmini{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--mute);font-size:14px}
+.qmini b{color:var(--ink);font:700 18px "Chakra Petch",sans-serif;margin-left:4px;white-space:nowrap}
+.qbtn{display:flex;gap:8px}
+.qbtn .tb[aria-expanded=true]{background:var(--vinyl);color:#fff;border-color:var(--vinyl)}
+.qbody{display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.quote.open .qbody{display:block}
+.qsheet{display:none}.qback{display:none}
+.qbar{margin:10px 0 0}
+.mkrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-bottom:6px;font-weight:700}
+@media(max-width:700px){
+ .quote{position:sticky;top:0;z-index:5;border-radius:0 0 16px 16px;margin-inline:calc(-1*max(4vw,16px));border-inline:0;border-top:0;box-shadow:0 8px 18px -12px rgba(0,0,0,.4)}
+ .qst{flex-basis:100%}.qst h2{font-size:17px}.qmini{flex:1}
+ .quote.open .qbody{position:fixed;left:0;right:0;bottom:0;max-height:86vh;overflow:auto;z-index:8;background:var(--page);border-radius:18px 18px 0 0;padding:14px 16px max(20px,env(safe-area-inset-bottom));margin:0;border-top:0;box-shadow:0 -10px 30px rgba(0,0,0,.4)}
+ .quote.open .qback{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:7}
+ .qsheet{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-14px;background:var(--page);padding:4px 0 8px;z-index:1}
+ .qsheet h2{font:700 20px "Chakra Petch",sans-serif;margin:0}
+ .qx{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:20px;cursor:pointer}
+ .fig{height:220px}
+}
 @keyframes pop{from{transform:scale(.92);opacity:0}}
 @keyframes shine{from{background-position:150% 0}to{background-position:-100% 0}}
 @keyframes enter{from{transform:scale(.55) rotateY(-160deg);opacity:0}}
@@ -156,18 +179,26 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-o
 <div class="tools"><div class="seg" id="flt"><button data-f="all" aria-pressed="true">Tutte</button><button data-f="own" aria-pressed="false">Presenti</button><button data-f="miss" aria-pressed="false">Mancanti</button></div>
 <button class="tb" id="edit" aria-pressed="false">Modifica</button></div></div>
 <ul class="legend" id="legend"></ul>
-<section class="quote" id="quote" aria-labelledby="qt"><div class="qh"><div><h2 id="qt">Quotazione</h2><p class="when" id="when">Nessuna valutazione ancora: premi il bottone.</p></div><button class="go" id="go">Valuta ora</button></div>
+<section class="quote" id="quote" aria-labelledby="qt">
+<div class="qsum"><div class="qst"><h2 id="qt">Quotazione</h2><p class="when" id="when">Nessuna valutazione ancora</p></div>
+<div class="qmini"><span>Valore <b id="qsv">—</b></span><span>Per completare <b id="qsc">—</b></span></div>
+<div class="qbtn"><button class="go" id="go">Valuta ora</button><button class="tb" id="qtog" aria-expanded="false" aria-controls="qbody">Dettagli</button></div></div>
 <div class="qbar" id="qbar" hidden><i id="qbi"></i></div>
+<div class="qback" id="qback"></div>
+<div class="qbody" id="qbody" role="region" aria-label="Dettagli quotazione">
+<div class="qsheet"><h2>Quotazione</h2><button class="qx" id="qx" aria-label="Chiudi dettagli">✕</button></div>
+<div class="mkrow"><span>Mercati di riferimento</span><div class="seg" id="mk"><button data-m="all" aria-pressed="false">Tutti</button><button data-m="cm" aria-pressed="false">Cardmarket</button><button data-m="tp" aria-pressed="false">TCGplayer</button></div></div>
+<p class="qd" id="mknote"></p>
 <div class="kpis"><div class="kpi"><span>Valore della collezione</span><b id="kv">—</b><small id="kvs"></small></div>
 <div class="kpi"><span>Per completare (prezzi minimi)</span><b id="kc">—</b><small id="kcs"></small></div>
 <div class="kpi"><span>Per completare (prezzi tipici)</span><b id="kt">—</b><small id="kts"></small></div></div>
 <div class="qh" style="margin:0 0 6px"><div class="seg" id="cser"><button data-k="v" aria-pressed="true">Valore collezione</button><button data-k="c" aria-pressed="false">Costo per completare</button></div><div class="leg2" style="margin:0"><span style="--k:var(--mute)"><i></i>Storico</span><span style="--k:var(--mute)"><i class="d"></i>Proiezione (stima)</span></div></div>
-<div class="fig" id="fig"><svg id="chart" role="img" aria-label="Andamento del valore della collezione e del costo per completarla"></svg></div>
+<div class="fig" id="fig"><svg id="chart" role="img" aria-label="Andamento nel tempo"></svg></div>
 <p class="qd" id="qnote"></p>
 <details class="qd"><summary>Come viene calcolata e valutazioni salvate</summary>
-<p>Prezzi Cardmarket letti da TCGdex al momento del controllo. Il valore di una copia è il prezzo di riferimento della carta (mediana tra trend e medie a 7 e 30 giorni; per le reverse il prezzo della versione reverse) moltiplicato per il coefficiente della sua condizione e, se italiana, per quello della lingua. Cardmarket non separa i prezzi per lingua e condizione in questi dati, quindi i coefficienti sono una stima che puoi cambiare qui sotto. Il passato del grafico usa le medie a 30, 7 e 1 giorno e le tue valutazioni salvate; il futuro è una proiezione lineare, non una previsione.</p>
+<p>I prezzi arrivano da TCGdex al momento del controllo: Cardmarket in euro (riferimento = mediana tra trend e medie a 7 e 30 giorni) e TCGplayer in dollari convertiti in euro al cambio del giorno. Con "Tutti" si usa la media dei due mercati e il prezzo minimo più basso. Il valore di una copia è il prezzo di riferimento della carta (per le reverse quello della versione reverse) moltiplicato per il coefficiente della condizione e, se italiana, per quello della lingua: i mercati non separano i prezzi per lingua e condizione in questi dati, quindi i coefficienti sono una stima modificabile. Lo storico a 7 e 30 giorni esiste solo per Cardmarket; la proiezione è una retta sui dati passati, non una previsione. eBay e CardTrader richiedono un account e per ora sono link nella scheda di ogni carta.</p>
 <div class="mults" id="mults"></div>
-<ul class="hist" id="hist"></ul></details></section>
+<ul class="hist" id="hist"></ul></details></div></section>
 <div class="notice" id="dirty" hidden><span>Hai modifiche o valutazioni salvate solo su questo browser.</span><button class="tb" id="exp">Copia JSON</button><button class="tb" id="rst">Annulla modifiche</button><span id="expmsg" role="status"></span></div>
 <div class="binder"><div class="pages" id="pages" tabindex="0" aria-label="Pagine dell'album"></div></div>
 <div class="ctl"><button id="prev">← Indietro</button><span id="pos" class="pgn"></span><button id="next">Avanti →</button></div>
@@ -223,51 +254,70 @@ function slot(r){const [n,name,t]=r,l=copies(n);
 /* quotazione */
 const LSQ="album-valutazioni-v1",LSP="album-prezzi-v1",LSM="album-coeff-v1";
 const DEFM={MT:1.15,NM:1,EX:.85,GD:.7,LP:.55,PL:.4,PO:.2,ITA:.8};
-let MUL={...DEFM},PRICES={},CHECKS=[],BASEQ=[];
+let MUL={...DEFM},PRICES={},CHECKS=[],BASEQ=[],MK="cm",RATE=null;try{MK=localStorage.getItem("album-mercato-v1")||"cm"}catch(e){}
 try{Object.assign(MUL,JSON.parse(localStorage.getItem(LSM))||{})}catch(e){}
 try{PRICES=JSON.parse(localStorage.getItem(LSP))||{}}catch(e){}
 const eur=v=>v==null||isNaN(v)?"—":v.toLocaleString("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:v<100?2:0});
 const dfmt=t=>new Date(t).toLocaleString("it-IT",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
 const med=a=>{a=a.filter(x=>x>0).sort((x,y)=>x-y);return a.length?a[(a.length-1)>>1]+(a.length%2?0:(a[a.length>>1]-a[(a.length-1)>>1])/2):null};
-function pick(cm,rev){if(!cm)return null;const s=rev&&(cm["trend-holo"]||cm["avg30-holo"])?"-holo":"";const g=k=>cm[k+s]>0?cm[k+s]:null;
+function pickCM(cm,rev){if(!cm)return null;const s=rev&&(cm["trend-holo"]||cm["avg30-holo"])?"-holo":"";const g=k=>cm[k+s]>0?cm[k+s]:null;
  return{ref:med([g("trend"),g("avg30"),g("avg7")]),low:cm.low>0?cm.low:null,a1:g("avg1"),a7:g("avg7"),a30:g("avg30"),trend:g("trend")}}
+function pickTP(tp,rev){if(!tp||!RATE)return null;const v=rev?(tp["reverse-holofoil"]||tp.holofoil):(tp.normal||tp.holofoil||tp["1st-edition"]||tp.unlimited);if(!v)return null;
+ const ref=v.marketPrice||v.midPrice,low=v.lowPrice;return{ref:ref?ref*RATE:null,low:low?low*RATE:null}}
+function entry(k){const e=PRICES[k];if(!e)return null;return e.cm||e.tp?e:{cm:e}}
+function priceOf(k,rev,mk){const e=entry(k);if(!e)return null;mk=mk||MK;const a=pickCM(e.cm,rev),b=pickTP(e.tp,rev);
+ if(mk==="cm")return a&&a.ref?a:null;if(mk==="tp")return b&&b.ref?b:null;
+ const refs=[a&&a.ref,b&&b.ref].filter(x=>x),lows=[a&&a.low,b&&b.low].filter(x=>x);if(!refs.length)return null;
+ return{ref:refs.reduce((x,y)=>x+y)/refs.length,low:lows.length?Math.min(...lows):null,a7:a&&a.a7,a30:a&&a.a30,a1:a&&a.a1,trend:a&&a.trend}}
 function cmult(c){return(MUL[c.c]??1)*(c.l==="ita"?MUL.ITA:1)}
-function totals(field){let v=0,cmin=0,ctyp=0,priced=0,miss=0;
- for(const [s] of SETS)for(const r of DATA[s]){const k=s+":"+r[0],cm=PRICES[k],l=COLL[k]||[];
-  if(!cm){miss++;continue}priced++;
-  if(l.length){for(const c of l){const p=pick(cm,c.r);const x=p&&(field?p[field]:p.ref);if(x)v+=x*cmult(c)}}
-  else{const p=pick(cm,false);const x=p&&(field?p[field]:p.ref);if(x)ctyp+=x;if(p)cmin+=(field?x:(p.low??p.ref))||0}}
+function totals(field,mk){let v=0,cmin=0,ctyp=0,priced=0,miss=0;mk=field?"cm":(mk||MK);
+ for(const [s] of SETS)for(const r of DATA[s]){const k=s+":"+r[0],l=COLL[k]||[];
+  if(!priceOf(k,false,mk)&&!priceOf(k,true,mk)){miss++;continue}priced++;
+  if(l.length){for(const c of l){const p=priceOf(k,c.r,mk)||priceOf(k,false,mk);const x=p&&(field?p[field]:p.ref);if(x)v+=x*cmult(c)}}
+  else{const p=priceOf(k,false,mk);const x=p&&(field?p[field]:p.ref);if(x)ctyp+=x;if(p)cmin+=(field?x:(p.low??p.ref))||0}}
  return{v,cmin,ctyp,priced,miss}}
+async function getRate(){try{const r=await fetch("https://api.frankfurter.app/latest?from=USD&to=EUR");const j=await r.json();if(j.rates&&j.rates.EUR)return j.rates.EUR}catch(e){}return null}
 async function fetchAll(){const keys=[];for(const [s] of SETS)for(const r of DATA[s])keys.push([s,r[0]]);
  let done=0,fail=0;const out={},q=keys.slice();$("qbar").hidden=false;
- async function worker(){while(q.length){const [s,n]=q.shift();try{const r=await fetch(`https://api.tcgdex.net/v2/en/cards/${s}-${encodeURIComponent(n)}`);if(!r.ok)throw 0;const j=await r.json();const cm=j.pricing&&j.pricing.cardmarket;if(cm)out[s+":"+n]=cm;else fail++}catch(e){fail++}
+ async function worker(){while(q.length){const [s,n]=q.shift();try{const r=await fetch(`https://api.tcgdex.net/v2/en/cards/${s}-${encodeURIComponent(n)}`);if(!r.ok)throw 0;const j=await r.json();const pr=j.pricing||{};if(pr.cardmarket||pr.tcgplayer)out[s+":"+n]={cm:pr.cardmarket||null,tp:pr.tcgplayer||null};else fail++}catch(e){fail++}
   done++;$("qbi").style.width=(done/keys.length*100).toFixed(1)+"%";$("go").textContent=`Controllo… ${done}/${keys.length}`}}
  await Promise.all(Array.from({length:10},worker));$("qbar").hidden=true;return{out,fail}}
 $("go").onclick=async()=>{const b=$("go");b.disabled=true;
- try{const {out,fail}=await fetchAll();if(!Object.keys(out).length)throw new Error("nessun prezzo");PRICES=out;try{localStorage.setItem(LSP,JSON.stringify(PRICES))}catch(e){}
-  const n=totals(),p1=totals("a1"),p7=totals("a7"),p30=totals("a30");
-  CHECKS.push({t:new Date().toISOString(),v:+n.v.toFixed(2),cmin:+n.cmin.toFixed(2),ctyp:+n.ctyp.toFixed(2),own:Object.keys(COLL).length,miss:n.miss,
+ try{const rt=await getRate();if(rt){RATE=rt;try{localStorage.setItem("album-cambio-v1",String(rt))}catch(e){}}const {out,fail}=await fetchAll();if(!Object.keys(out).length)throw new Error("nessun prezzo");PRICES=out;try{localStorage.setItem(LSP,JSON.stringify(PRICES))}catch(e){}
+  const n=totals(null,"cm"),p1=totals("a1"),p7=totals("a7"),p30=totals("a30"),mkx={};for(const m of ["cm","tp","all"]){const t=totals(null,m);mkx[m]=[+t.v.toFixed(2),+t.cmin.toFixed(2),+t.ctyp.toFixed(2)]}
+  CHECKS.push({t:new Date().toISOString(),v:+n.v.toFixed(2),cmin:+n.cmin.toFixed(2),ctyp:+n.ctyp.toFixed(2),mk:mkx,rate:RATE,own:Object.keys(COLL).length,miss:n.miss,
    h:{1:[+p1.v.toFixed(2),+p1.ctyp.toFixed(2)],7:[+p7.v.toFixed(2),+p7.ctyp.toFixed(2)],30:[+p30.v.toFixed(2),+p30.ctyp.toFixed(2)]}});
   saveQ();$("qnote").textContent=fail?`${fail} carte senza prezzo su Cardmarket: non sono nei totali.`:""}
  catch(e){$("qnote").textContent="Controllo non riuscito: TCGdex non risponde. Riprova tra poco."}
  b.disabled=false;b.textContent="Valuta ora";showQ()};
+const cv=(c,i)=>c.mk&&c.mk[MK]?c.mk[MK][i]:(MK==="cm"?[c.v,c.cmin,c.ctyp][i]:null);
 function saveQ(){try{localStorage.setItem(LSQ,JSON.stringify(CHECKS))}catch(e){}dirty()}
 function delta(a,b){if(b==null||!a)return"";const d=a-b,p=b?d/b*100:0;return`<span class="${d>=0?"up":"down"}">${d>=0?"+":""}${eur(d)} (${p>=0?"+":""}${p.toFixed(1)}%)</span>`}
 function showQ(){const last=CHECKS[CHECKS.length-1],prev=CHECKS[CHECKS.length-2];
  if(last){$("when").textContent=`Controllata il ${dfmt(last.t)}`;
   const live=Object.keys(PRICES).length?totals():null;
-  $("kv").textContent=eur(live?live.v:last.v);$("kvs").innerHTML=(prev?`dal controllo precedente ${delta(last.v,prev.v)}`:`30 giorni fa circa ${eur(last.h[30][0])} ${delta(last.v,last.h[30][0])}`);
-  $("kc").textContent=eur(live?live.cmin:last.cmin);$("kcs").textContent="somma dei prezzi più bassi in vendita, qualsiasi condizione";
-  $("kt").textContent=eur(live?live.ctyp:last.ctyp);$("kts").textContent="somma dei prezzi di riferimento delle carte mancanti"}
- $("hist").innerHTML=CHECKS.slice().reverse().map(c=>`<li><span>${dfmt(c.t)}</span><b>${eur(c.v)} · completare ${eur(c.ctyp)}</b></li>`).join("");
+  const lv=live?live.v:cv(last,0),pv=prev?cv(prev,0):null;
+  $("kv").textContent=eur(lv);$("kvs").innerHTML=(pv!=null?`dal controllo precedente ${delta(lv,pv)}`:MK==="cm"?`30 giorni fa circa ${eur(last.h[30][0])} ${delta(lv,last.h[30][0])}`:"");
+  $("qsv").textContent=eur(lv);$("qsc").textContent=eur(live?live.cmin:cv(last,1));
+  $("kc").textContent=eur(live?live.cmin:cv(last,1));$("kcs").textContent="somma dei prezzi più bassi in vendita, qualsiasi condizione";
+  $("kt").textContent=eur(live?live.ctyp:cv(last,2));$("kts").textContent="somma dei prezzi di riferimento delle carte mancanti"}
+ $("hist").innerHTML=CHECKS.slice().reverse().map(c=>`<li><span>${dfmt(c.t)}</span><b>${eur(cv(c,0))} · completare ${eur(cv(c,1))}</b></li>`).join("");
+ document.querySelectorAll("#mk button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===MK));
+ $("mknote").textContent=MK==="cm"?"Prezzi Cardmarket in euro, con storico a 7 e 30 giorni.":MK==="tp"?`Prezzi TCGplayer (mercato USA) convertiti in euro${RATE?` a ${RATE.toFixed(4)} €/$`:""}. Nessuno storico precedente: il grafico usa solo i tuoi controlli.`:`Media tra Cardmarket e TCGplayer${RATE?` (cambio ${RATE.toFixed(4)} €/$)`:""}. Il grafico usa solo i tuoi controlli.`;
  $("mults").innerHTML=Object.keys(DEFM).map(k=>`<label>${k==="ITA"?"Copia italiana":k} ×<input type="number" step="0.05" min="0" max="3" data-m="${k}" value="${MUL[k]}"></label>`).join("");
  draw()}
 $("mults").addEventListener("change",e=>{const k=e.target.dataset.m;if(!k)return;const v=parseFloat(e.target.value);if(!(v>=0))return;MUL[k]=v;try{localStorage.setItem(LSM,JSON.stringify(MUL))}catch(e){}showQ()});
 function series(){const pts=[];const real=new Set();
- CHECKS.forEach(c=>{const t=+new Date(c.t);[[30,c.h[30]],[7,c.h[7]]].forEach(([d,x])=>{if(x&&x[0])pts.push({t:t-d*864e5,v:x[0],c:x[1],est:1})});pts.push({t,v:c.v,c:c.ctyp});real.add(t)});
+ CHECKS.forEach(c=>{const t=+new Date(c.t);if(MK==="cm")[[30,c.h[30]],[7,c.h[7]]].forEach(([d,x])=>{if(x&&x[0])pts.push({t:t-d*864e5,v:x[0],c:x[1],est:1})});const v=cv(c,0),cc=cv(c,2);if(v!=null)pts.push({t,v,c:cc});real.add(t)});
  pts.sort((a,b)=>a.t-b.t);const out=[];for(const p of pts){const o=out[out.length-1];if(o&&Math.abs(o.t-p.t)<864e5*.5){if(!p.est)out[out.length-1]=p}else out.push(p)}return out}
 function fit(pts,key){const n=pts.length;if(n<2)return null;const t0=pts[0].t;let sx=0,sy=0,sxx=0,sxy=0;pts.forEach(p=>{const x=(p.t-t0)/864e5,y=p[key];sx+=x;sy+=y;sxx+=x*x;sxy+=x*y});
  const d=n*sxx-sx*sx;if(!d)return null;const m=(n*sxy-sx*sy)/d,b=(sy-m*sx)/n;return t=>Math.max(0,m*((t-t0)/864e5)+b)}
+$("mk").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;MK=b.dataset.m;try{localStorage.setItem("album-mercato-v1",MK)}catch(e){}showQ();if(open)panel()});
+try{RATE=parseFloat(localStorage.getItem("album-cambio-v1"))||null}catch(e){}
+const quote=$("quote");function setQ(o){quote.classList.toggle("open",o);$("qtog").setAttribute("aria-expanded",o);$("qtog").textContent=o?"Chiudi":"Dettagli";try{localStorage.setItem("album-quota-aperta",o?"1":"")}catch(e){}
+ if(innerWidth<=700)document.body.style.overflow=o?"hidden":"";if(o)requestAnimationFrame(draw)}
+$("qtog").onclick=()=>setQ(!quote.classList.contains("open"));$("qx").onclick=()=>setQ(false);$("qback").onclick=()=>setQ(false);
+try{if(innerWidth>700&&localStorage.getItem("album-quota-aperta"))setQ(true)}catch(e){}
 const chart=$("chart");let SER="v";
 $("cser").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;SER=b.dataset.k;document.querySelectorAll("#cser button").forEach(x=>x.setAttribute("aria-pressed",x===b));draw()});
 function draw(){const W=chart.clientWidth,H=chart.clientHeight;if(!W)return;const pts=series();
@@ -287,9 +337,9 @@ const ro=new ResizeObserver(draw);ro.observe($("fig"));
 function prBlock(){if(!open)return"";const cm=PRICES[key(open[0])];const q=encodeURIComponent(`${open[1]} ${open[0]} ${SETS.find(s=>s[0]===cur)[1]}`);
  const links=`<a href="https://www.cardmarket.com/it/Pokemon/Products/Search?searchString=${encodeURIComponent(open[1])}" target="_blank" rel="noopener">Cardmarket</a> · <a href="https://www.ebay.it/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">Venduti eBay.it</a> · <a href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">eBay.com</a>`;
  if(!cm)return`<div class="pr">Nessun prezzo: premi "Valuta ora".<br>${links}</div>`;
- const p=pick(cm,false),pv=pick(cm,true),l=copies(open[0]);
- let h=`<div class="pr"><b>Cardmarket</b><div class="prg"><span>Riferimento</span><b>${eur(p.ref)}</b><span>Più basso in vendita</span><b>${eur(p.low)}</b><span>Media 1/7/30 gg</span><b>${eur(p.a1)} · ${eur(p.a7)} · ${eur(p.a30)}</b>${pv&&cm["trend-holo"]?`<span>Reverse</span><b>${eur(pv.ref)}</b>`:""}</div>`;
- if(l.length)h+=`<div class="prg">${l.map((c,i)=>{const x=pick(cm,c.r);return`<span>Copia ${i+1} (${c.c}${c.l==="ita"?", ITA":""}${c.r?", rev":""})</span><b>${eur(x&&x.ref?x.ref*cmult(c):null)}</b>`}).join("")}</div>`;
+ const p=pickCM(cm&&cm.cm?cm.cm:cm,false)||{},pv=pickCM(cm&&cm.cm?cm.cm:cm,true),l=copies(open[0]),e=entry(key(open[0])),tp=e&&pickTP(e.tp,false);
+ let h=`<div class="pr"><b>Prezzi</b> <small>(valore copie con: ${MK==="cm"?"Cardmarket":MK==="tp"?"TCGplayer":"tutti i mercati"})</small><div class="prg"><span>Riferimento</span><b>${eur(p.ref)}</b><span>Più basso in vendita</span><b>${eur(p.low)}</b><span>Media 1/7/30 gg</span><b>${eur(p.a1)} · ${eur(p.a7)} · ${eur(p.a30)}</b>${pv&&pv.ref&&pv.ref!==p.ref?`<span>Reverse</span><b>${eur(pv.ref)}</b>`:""}${tp?`<span>TCGplayer</span><b>${eur(tp.ref)} (min ${eur(tp.low)})</b>`:""}</div>`;
+ if(l.length)h+=`<div class="prg">${l.map((c,i)=>{const x=priceOf(key(open[0]),c.r)||priceOf(key(open[0]),false);return`<span>Copia ${i+1} (${c.c}${c.l==="ita"?", ITA":""}${c.r?", rev":""})</span><b>${eur(x&&x.ref?x.ref*cmult(c):null)}</b>`}).join("")}</div>`;
  return h+links+"</div>"}
 const pages=$("pages");
 function counts(s){return DATA[s].filter(r=>(COLL[s+":"+r[0]]||[]).length).length}
@@ -353,7 +403,7 @@ pages.addEventListener("click",e=>{const s=e.target.closest(".slot");if(s)openCa
 pages.addEventListener("keydown",e=>{const s=e.target.closest(".slot");if(s&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openCard(s.dataset.n)}});
 $("xb").onclick=closeCard;
 lb.addEventListener("click",e=>{if(e.target===lb||e.target.classList.contains("lbin"))closeCard()});
-addEventListener("keydown",e=>{if(!open){if(e.key==="ArrowLeft")go(-1);if(e.key==="ArrowRight")go(1);return}if(e.key==="Escape")closeCard()});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&quote.classList.contains("open")&&!open){setQ(false);return}if(!open){if(e.key==="ArrowLeft")go(-1);if(e.key==="ArrowRight")go(1);return}if(e.key==="Escape")closeCard()});
 const still=matchMedia("(prefers-reduced-motion:reduce)").matches;
 function glare(e){const b=c3.getBoundingClientRect(),px=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width)),py=Math.min(1,Math.max(0,(e.clientY-b.top)/b.height));c3.style.setProperty("--gx",(px*100).toFixed(1)+"%");c3.style.setProperty("--gy",(py*100).toFixed(1)+"%");return[px,py]}
 stage.addEventListener("pointermove",e=>{const [px,py]=glare(e);if(drag){const dx=e.clientX-drag.x;if(Math.abs(dx)>6)drag.moved=true;spin=dx*.7;tx=0;ty=0;apply();return}
