@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Album carte Pokémon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: a collector's binder, warm and tactile, proud of what's in the pockets
-   IDEA: a 9-pocket ring binder per set, paged sideways like the real thing
-   PICTURE: the open binder spread itself, filled pockets glowing, empty ones as clear sleeves
-   COLOUR and TYPE: binder vinyl in each set's colour, pockets on soft white; Chakra Petch for e-card era numbering, Nunito Sans body
-   LAYOUT: set tabs, progress, the binder (two pages wide, one on phones), controls under it */
+   IDEA: a 9-pocket ring binder per set, each card framed by the colour of its grade
+   PICTURE: the binder spread; owned cards sharp, ringed red-to-blue by condition and visibly worn as graded
+   COLOUR and TYPE: binder vinyl in each set's colour, Cardmarket-style grade ramp PO red → MT blue; Chakra Petch + Nunito Sans
+   LAYOUT: set tabs, progress + tools, legend, binder, viewer with copies panel */
 :root{color-scheme:light dark;--bg:light-dark(#eef0f4,#101218);--ink:light-dark(#141821,#eceef4);--mute:light-dark(#5b6272,#9aa1b2);--page:light-dark(#fbfbf9,#1b1e27);--sleeve:light-dark(#e4e7ee,#262a36);--line:light-dark(#cfd4de,#343a4a);--vinyl:#1d3f8f;--vinyl2:#0f2560;--acc:#ffcc33}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
@@ -22,147 +22,238 @@ h1{font:700 clamp(30px,5vw,48px)/1.05 "Chakra Petch",sans-serif;margin:0 0 6px;t
 .tabs button[aria-selected=true]{background:var(--bg);color:var(--ink)}
 .tabs small{opacity:.7;font-weight:600;margin-left:6px}
 main{padding:20px max(4vw,16px) 40px;max-width:1240px;margin:0 auto}
-.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:16px}
-.prog{flex:1 1 260px}
+.bar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.prog{flex:1 1 240px}
 .prog b{font:700 28px "Chakra Petch",sans-serif}
 .meter{height:10px;border-radius:5px;background:var(--sleeve);overflow:hidden;margin-top:6px}
 .meter i{display:block;height:100%;background:linear-gradient(90deg,var(--vinyl),var(--acc));transition:width .5s}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.seg button{font:inherit;color:var(--ink);background:none;border:0;padding:10px 14px;min-height:44px;cursor:pointer}
+.seg button,.tb{font:inherit;color:var(--ink);background:none;border:0;padding:10px 14px;min-height:44px;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--vinyl);color:#fff}
+.tb{border:1px solid var(--line);border-radius:12px;background:var(--page)}
+.tb[aria-pressed=true]{background:var(--acc);color:#141821;border-color:var(--acc);font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 14px;padding:0;list-style:none;font-size:14px;color:var(--mute)}
+.legend li{display:flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:4px;background:var(--k)}
+.legend b{color:var(--ink);font:700 13px "Chakra Petch",sans-serif}
+.notice{background:var(--page);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:10px 14px;margin:0 0 14px;font-size:15px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.notice[hidden]{display:none}
 .binder{background:linear-gradient(160deg,var(--vinyl),var(--vinyl2));border-radius:18px;padding:14px;box-shadow:0 18px 40px -18px rgba(0,0,0,.5);transition:background .4s}
 .pages{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;scrollbar-width:none}
 .pages::-webkit-scrollbar{display:none}
-.pg{flex:0 0 calc(50% - 7px);scroll-snap-align:start;background:var(--page);border-radius:10px;padding:12px;position:relative}
-.pg:nth-child(odd)::before{content:"";position:absolute;left:-1px;top:10%;bottom:10%;width:6px;background:repeating-linear-gradient(transparent 0 28%,rgba(0,0,0,.25) 28% 34%)}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pg{flex:0 0 calc(50% - 7px);scroll-snap-align:start;background:var(--page);border-radius:10px;padding:14px 12px 12px;position:relative}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .pgn{text-align:center;font:600 13px "Chakra Petch",sans-serif;color:var(--mute);margin-top:8px}
-.slot{overflow:hidden;aspect-ratio:63/88;border-radius:7px;position:relative}
-.empty{background:var(--sleeve);border:1.5px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px;color:var(--mute)}
+.slot{aspect-ratio:63/88;border-radius:7px;position:relative;cursor:pointer}
+.empty{background:var(--sleeve);border:1.5px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px;color:var(--mute);overflow:hidden}
 .empty .no{font:700 clamp(15px,2vw,22px) "Chakra Petch",sans-serif;opacity:.7}
 .empty .nm{font-size:13px;line-height:1.2}
-.card{background:var(--c);padding:5%;display:flex;flex-direction:column;box-shadow:0 3px 8px -3px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,255,255,.35);color:#14161c;overflow:hidden;animation:pop .35s ease both}
-.card .top{display:flex;justify-content:space-between;align-items:baseline;gap:4px;font-weight:700;font-size:clamp(13px,1.35vw,15px);line-height:1.1}
-.card .top span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.art{flex:1;margin:5% 0;border-radius:4px;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.85),transparent 45%),radial-gradient(circle at 70% 75%,rgba(0,0,0,.18),transparent 55%),var(--c);border:2px solid rgba(255,255,255,.7);display:grid;place-items:center}
-.art svg{width:42%;opacity:.55}
-.card .ft{display:flex;justify-content:space-between;font:700 13px "Chakra Petch",sans-serif}
-.rev{position:absolute;inset:0;border-radius:7px;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 45%,rgba(160,230,255,.35) 52%,transparent 65%);background-size:250% 100%;animation:shine 3.5s linear infinite;pointer-events:none}
-.tag{position:absolute;top:4px;right:4px;background:var(--acc);color:#141821;font:700 13px "Chakra Petch",sans-serif;padding:1px 6px;border-radius:6px}
-.dark .card,.card.dk{color:#f1f2f6}
-.empty{overflow:hidden}
 .empty img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:7px;filter:blur(1.6px) grayscale(.7);opacity:.32}
 .empty .mn{position:absolute;left:6px;bottom:5px;font:700 13px "Chakra Petch",sans-serif;background:var(--page);color:var(--ink);padding:0 6px;border-radius:5px;opacity:.9}
 .empty:not(:has(img)) .mn{display:none}
-.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:7px;background:var(--c)}
-.card{cursor:zoom-in}
-.lb{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,rgba(30,36,52,.88),rgba(6,8,12,.94));display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;z-index:9;touch-action:none}
-.lb.on{display:flex}
-.stage{perspective:1100px;width:min(78vw,360px,calc(66vh*63/88))}
-.c3w{animation:enter .55s cubic-bezier(.2,.9,.3,1.2) both}
-.c3{position:relative;aspect-ratio:63/88;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.8,.25,1);cursor:grab;--gx:50%;--gy:50%}
-.c3.drag{transition:none;cursor:grabbing}.c3.hov{transition:transform .12s linear}
-.face{position:absolute;inset:0;border-radius:4.6%/3.3%;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.08)}
-.face img{width:100%;height:100%;object-fit:cover;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
-.face::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--gx) var(--gy),rgba(255,255,255,.55),rgba(255,255,255,0) 45%);mix-blend-mode:overlay}
-.c3.rv .front::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(115deg,#ff6ec7,#ffe66d,#6effa8,#6ec8ff,#c46eff,#ff6ec7);background-size:300% 300%;background-position:var(--gx) var(--gy);mix-blend-mode:color-dodge;opacity:.35}
-.back{transform:rotateY(180deg);background:#1f2b5c url(back.png) center/100% 100% no-repeat}
-.cap{color:#fff;text-align:center;line-height:1.3}.cap b{font:700 20px "Chakra Petch",sans-serif;display:block}.cap span{color:#c9cede;font-size:14px}
-.emb{width:46%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff6c8,var(--acc) 45%,#c98a00);color:#141821;font:700 clamp(26px,8vw,44px)/1 "Chakra Petch",sans-serif;box-shadow:0 0 0 6px rgba(255,255,255,.18),0 10px 24px rgba(0,0,0,.35);margin-bottom:8px}
-.back .bs{font:600 13px "Chakra Petch",sans-serif;opacity:.8}
-.back .bn{font:700 clamp(20px,5.5vw,28px)/1.1 "Chakra Petch",sans-serif;text-wrap:balance}
-.back .bt{display:inline-block;margin-top:6px;background:rgba(255,255,255,.16);border-radius:999px;padding:3px 12px;font-size:14px}
-.hint{color:#c9cede;font-size:14px;text-align:center}
-.xb{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer}
-@keyframes enter{from{transform:scale(.55) rotateY(-160deg);opacity:0}}
-@media(prefers-reduced-motion:reduce){.c3w{animation:none}.c3{transition:none}}
+.card{background:var(--c);box-shadow:0 0 0 3px var(--cc),0 6px 12px -6px rgba(0,0,0,.5);animation:pop .35s ease both}
+.cw{position:absolute;inset:0;border-radius:7px;overflow:hidden;padding:5%;display:flex;flex-direction:column;color:#14161c}
+.cw .top{font-weight:700;font-size:clamp(13px,1.35vw,15px);line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cw .art{flex:1;margin:5% 0;border-radius:4px;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.85),transparent 45%),var(--c);border:2px solid rgba(255,255,255,.7)}
+.cw .ft{display:flex;justify-content:space-between;font:700 13px "Chakra Petch",sans-serif}
+.ci{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:var(--c)}
+.wear{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.lv4 .ci{filter:saturate(.93) brightness(.99)}
+.lv5 .ci{filter:saturate(.82) sepia(.1) brightness(.96)}
+.lv6 .ci{filter:saturate(.68) sepia(.22) brightness(.92) contrast(.94)}
+.rev{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 45%,rgba(160,230,255,.35) 52%,transparent 65%);background-size:250% 100%;animation:shine 3.5s linear infinite;pointer-events:none}
+.cb{position:absolute;left:-3px;bottom:-3px;background:var(--cc);color:#fff;font:700 13px/1 "Chakra Petch",sans-serif;padding:4px 6px 3px;border-radius:0 6px 0 6px;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.cb.lt{color:#141821;text-shadow:none}
+.qt{position:absolute;right:-3px;bottom:-3px;background:#141821;color:#fff;font:700 13px/1 "Chakra Petch",sans-serif;padding:4px 6px 3px;border-radius:6px 0 6px 0}
+.tag{position:absolute;top:4px;right:4px;background:var(--acc);color:#141821;font:700 13px "Chakra Petch",sans-serif;padding:1px 6px;border-radius:6px}
 .ctl{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px}
 .ctl button{font:600 16px "Chakra Petch",sans-serif;background:var(--page);color:var(--ink);border:1px solid var(--line);border-radius:12px;min-height:44px;padding:0 18px;cursor:pointer}
 .ctl button:disabled{opacity:.4;cursor:default}
-button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 .note{color:var(--mute);font-size:14px;margin-top:18px}
+/* viewer */
+.lb{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,rgba(30,36,52,.9),rgba(6,8,12,.95));display:none;overflow:auto;z-index:9;color:#fff;padding:max(16px,env(safe-area-inset-top)) 16px 24px}
+.lb.on{display:block}
+.lbin{min-height:100%;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px 36px;padding-top:40px}
+.lcol{display:flex;flex-direction:column;align-items:center;gap:12px}
+.stage{perspective:1100px;width:min(80vw,340px,calc(62vh*63/88))}
+.c3w{animation:enter .55s cubic-bezier(.2,.9,.3,1.2) both}
+.c3{position:relative;aspect-ratio:63/88;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.8,.25,1);cursor:grab;touch-action:none;--gx:50%;--gy:50%}
+.c3.drag{transition:none;cursor:grabbing}.c3.hov{transition:transform .12s linear}
+.face{position:absolute;inset:0;border-radius:4.6%/3.3%;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 0 0 3px var(--cc,transparent),0 30px 60px -20px rgba(0,0,0,.8)}
+.face img{width:100%;height:100%;object-fit:cover;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.front.miss img{filter:grayscale(.6);opacity:.55}
+.front::after,.back::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--gx) var(--gy),rgba(255,255,255,.5),rgba(255,255,255,0) 45%);mix-blend-mode:overlay}
+.front .lv4,.front.lv4 img{filter:saturate(.93) brightness(.99)}
+.front.lv5 img{filter:saturate(.82) sepia(.1) brightness(.96)}
+.front.lv6 img{filter:saturate(.68) sepia(.22) brightness(.92) contrast(.94)}
+.front.rv::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(115deg,#ff6ec7,#ffe66d,#6effa8,#6ec8ff,#c46eff,#ff6ec7);background-size:300% 300%;background-position:var(--gx) var(--gy);mix-blend-mode:color-dodge;opacity:.35}
+.back{transform:rotateY(180deg);background:#1f2b5c url(back.png) center/100% 100% no-repeat}
+.cap{text-align:center;line-height:1.3;margin:0}.cap b{font:700 20px "Chakra Petch",sans-serif;display:block}.cap span{color:#c9cede;font-size:14px}
+.hint{color:#9aa1b2;font-size:14px;text-align:center;margin:0}
+.xb{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:10}
+.panel{width:min(100%,400px);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+.panel h2{font:700 20px "Chakra Petch",sans-serif;margin:0 0 4px}
+.panel .ph{color:#9aa1b2;font-size:14px;margin:0 0 12px}
+.cp{border:1px solid rgba(255,255,255,.14);border-left:5px solid var(--cc);border-radius:12px;padding:10px 12px;margin-bottom:10px;cursor:pointer;background:rgba(0,0,0,.15)}
+.cp.sel{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);border-left-color:var(--cc)}
+.cph{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}
+.cph small{font-weight:400;color:#c9cede}
+.chips{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:10px 0 8px}
+.chip{font:700 13px "Chakra Petch",sans-serif;min-height:40px;border-radius:8px;border:2px solid var(--k);background:transparent;color:#fff;cursor:pointer;padding:0}
+.chip[aria-pressed=true]{background:var(--k);color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.4)}
+.row2{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row2 button,.addc{font:inherit;font-size:15px;min-height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:0 12px;cursor:pointer}
+.row2 button[aria-pressed=true]{background:var(--acc);color:#141821;border-color:var(--acc);font-weight:700}
+.row2 .del{margin-left:auto;color:#ffb3b3}
+.addc{width:100%;min-height:44px;font-weight:700}
+.cdesc{color:#c9cede;font-size:14px;margin:12px 0 0}
+.cdesc b{color:#fff}
 @keyframes pop{from{transform:scale(.92);opacity:0}}
 @keyframes shine{from{background-position:150% 0}to{background-position:-100% 0}}
-@media(max-width:700px){.pg{flex-basis:100%}.binder{padding:8px}.grid{gap:7px}}
-@media(prefers-reduced-motion:reduce){.card,.rev{animation:none}.pages{scroll-behavior:auto}}
+@keyframes enter{from{transform:scale(.55) rotateY(-160deg);opacity:0}}
+@media(max-width:700px){.pg{flex-basis:100%}.binder{padding:8px}.grid{gap:10px}.lbin{padding-top:48px}}
+@media(prefers-reduced-motion:reduce){.card,.rev,.c3w{animation:none}.c3{transition:none}}
 </style></head><body data-set="ecard1">
-<header><h1>Album carte Pokémon</h1><p class="sub">Expedition, Aquapolis e Neo Destiny: le carte presenti nei raccoglitori, pagina per pagina.</p><div class="tabs" role="tablist" id="tabs"></div></header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<filter id="wb1" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="2.2"/></filter>
+<filter id="wb2" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="5"/></filter>
+<radialGradient id="stain"><stop offset="0" stop-color="#7a5a2a" stop-opacity=".55"/><stop offset=".6" stop-color="#8a6a35" stop-opacity=".3"/><stop offset=".85" stop-color="#5e4018" stop-opacity=".45"/><stop offset="1" stop-color="#5e4018" stop-opacity="0"/></radialGradient>
+</defs></svg>
+<header><h1>Album carte Pokémon</h1><p class="sub">Expedition, Aquapolis e Neo Destiny: le carte nei raccoglitori, con le condizioni di ogni copia.</p><div class="tabs" role="tablist" id="tabs"></div></header>
 <main>
 <div class="bar"><div class="prog"><b id="cnt"></b> <span id="cntl"></span><div class="meter"><i id="mt"></i></div></div>
-<div class="seg" id="flt"><button data-f="all" aria-pressed="true">Tutte</button><button data-f="own" aria-pressed="false">Presenti</button><button data-f="miss" aria-pressed="false">Mancanti</button></div></div>
+<div class="tools"><div class="seg" id="flt"><button data-f="all" aria-pressed="true">Tutte</button><button data-f="own" aria-pressed="false">Presenti</button><button data-f="miss" aria-pressed="false">Mancanti</button></div>
+<button class="tb" id="edit" aria-pressed="false">Modifica</button></div></div>
+<ul class="legend" id="legend"></ul>
+<div class="notice" id="dirty" hidden><span>Hai modifiche salvate solo su questo browser.</span><button class="tb" id="exp">Copia JSON</button><button class="tb" id="rst">Annulla modifiche</button><span id="expmsg" role="status"></span></div>
 <div class="binder"><div class="pages" id="pages" tabindex="0" aria-label="Pagine dell'album"></div></div>
 <div class="ctl"><button id="prev">← Indietro</button><span id="pos" class="pgn"></span><button id="next">Avanti →</button></div>
-<p class="note">Immagini da pokemontcg.io (versione inglese). Tocca una carta presente per ingrandirla. Numerazione e nomi dalla lista inglese di ciascun set. Le carte senza numero nella tua lista sono state abbinate alla versione più probabile (es. Bulbasaur → 94, Butterfree → 38, Arbok → 35). Le Aquapolis 103a/103b e 95a occupano lo slot del loro numero.</p>
+<p class="note">Immagini da pokemontcg.io (versione inglese). Condizioni secondo la scala Cardmarket, da Mint a Poor: nel raccoglitore si vede la copia migliore, col bordo del suo colore e l'usura simulata. Tocca una carta per vederla in 3D e gestire le copie.</p>
 </main>
-<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Carta ingrandita"><button class="xb" id="xb" aria-label="Chiudi">✕</button><div class="stage" id="stage"><div class="c3w" id="c3w"><div class="c3" id="c3"><div class="face front"><img id="fimg" alt=""></div><div class="face back" role="img" aria-label="Retro della carta"></div></div></div></div><p class="cap" id="cap"></p><p class="hint">Tocca per girarla · trascinala per ruotarla</p></div>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Carta ingrandita"><button class="xb" id="xb" aria-label="Chiudi">✕</button>
+<div class="lbin"><div class="lcol"><div class="stage" id="stage"><div class="c3w" id="c3w"><div class="c3" id="c3"><div class="face front" id="fr"><img id="fimg" alt=""><span id="fwear"></span></div><div class="face back" role="img" aria-label="Retro della carta"></div></div></div></div>
+<p class="cap" id="cap"></p><p class="hint">Tocca per girarla · trascinala per ruotarla</p></div>
+<aside class="panel" id="panel"></aside></div></div>
 <script>
 const DATA={"ecard1":[["1","Alakazam","Psychic","R",null],["2","Ampharos","Lightning","R",null],["3","Arbok","Grass","R",null],["4","Blastoise","Water","R",null],["5","Butterfree","Grass","R",null],["6","Charizard","Fire","R",null],["7","Clefable","Colorless","R",null],["8","Cloyster","Water","R",null],["9","Dragonite","Colorless","R",null],["10","Dugtrio","Fighting","R",null],["11","Fearow","Colorless","R",null],["12","Feraligatr","Water","R",null],["13","Gengar","Psychic","R",null],["14","Golem","Fighting","R",null],["15","Kingler","Water","R",null],["16","Machamp","Fighting","R",null],["17","Magby","Fire","R",null],["18","Meganium","Grass","R",null],["19","Mew","Psychic","R",null],["20","Mewtwo","Psychic","R",null],["21","Ninetales","Fire","R",null],["22","Pichu","Lightning","R",null],["23","Pidgeot","Colorless","R",null],["24","Poliwrath","Water","R",null],["25","Raichu","Lightning","R",null],["26","Rapidash","Fire","R",null],["27","Skarmory","Metal","R",null],["28","Typhlosion","Fire","R",null],["29","Tyranitar","Darkness","R",null],["30","Venusaur","Grass","R",null],["31","Vileplume","Grass","R",null],["32","Weezing","Grass","R",null],["33","Alakazam","Psychic","R",null],["34","Ampharos","Lightning","R",null],["35","Arbok","Grass","R",""],["36","Blastoise","Water","R",null],["37","Blastoise","Water","R",null],["38","Butterfree","Grass","R",""],["39","Charizard","Fire","R",null],["40","Charizard","Fire","R",null],["41","Clefable","Colorless","R",null],["42","Cloyster","Water","R",""],["43","Dragonite","Colorless","R",null],["44","Dugtrio","Fighting","R","rev"],["45","Fearow","Colorless","R",null],["46","Feraligatr","Water","R",null],["47","Feraligatr","Water","R",null],["48","Gengar","Psychic","R",null],["49","Golem","Fighting","R",""],["50","Kingler","Water","R",""],["51","Machamp","Fighting","R",null],["52","Magby","Fire","R",""],["53","Meganium","Grass","R",null],["54","Meganium","Grass","R",null],["55","Mew","Psychic","R",null],["56","Mewtwo","Psychic","R",null],["57","Ninetales","Fire","R",null],["58","Pichu","Lightning","R",null],["59","Pidgeot","Colorless","R",null],["60","Poliwrath","Water","R",null],["61","Raichu","Lightning","R",null],["62","Rapidash","Fire","R",null],["63","Skarmory","Metal","R",null],["64","Typhlosion","Fire","R",null],["65","Typhlosion","Fire","R",null],["66","Tyranitar","Darkness","R",null],["67","Venusaur","Grass","R",null],["68","Venusaur","Grass","R",null],["69","Vileplume","Grass","R",null],["70","Weezing","Grass","R",null],["71","Bayleef","Grass","U",null],["72","Chansey","Colorless","U",null],["73","Charmeleon","Fire","U",""],["74","Croconaw","Water","U",""],["75","Dragonair","Colorless","U",""],["76","Electabuzz","Lightning","U",""],["77","Flaaffy","Lightning","U",""],["78","Gloom","Grass","U",""],["79","Graveler","Fighting","U",null],["80","Haunter","Psychic","U",""],["81","Hitmonlee","Fighting","U",""],["82","Ivysaur","Grass","U",null],["83","Jynx","Water","U",""],["84","Kadabra","Psychic","U",null],["85","Machoke","Fighting","U",""],["86","Magmar","Fire","U",""],["87","Metapod","Grass","U",null],["88","Pidgeotto","Colorless","U",null],["89","Poliwhirl","Water","U",null],["90","Pupitar","Fighting","U",""],["91","Quilava","Fire","U",null],["92","Wartortle","Water","U",null],["93","Abra","Psychic","C",""],["94","Bulbasaur","Grass","C",""],["95","Bulbasaur","Grass","C",null],["96","Caterpie","Grass","C",null],["97","Charmander","Fire","C",""],["98","Charmander","Fire","C",null],["99","Chikorita","Grass","C",""],["100","Chikorita","Grass","C",""],["101","Clefairy","Colorless","C",""],["102","Corsola","Water","C",null],["103","Cubone","Fighting","C",null],["104","Cyndaquil","Fire","C",""],["105","Cyndaquil","Fire","C",""],["106","Diglett","Fighting","C",""],["107","Dratini","Colorless","C",""],["108","Ekans","Grass","C",""],["109","Gastly","Psychic","C",""],["110","Geodude","Fighting","C",""],["111","Goldeen","Water","C",null],["112","Hoppip","Grass","C",""],["113","Houndour","Darkness","C",""],["114","Koffing","Grass","C",""],["115","Krabby","Water","C",null],["116","Larvitar","Fighting","C",""],["117","Machop","Fighting","C",""],["118","Magikarp","Water","C",null],["119","Mareep","Lightning","C",""],["120","Marill","Water","C",""],["121","Meowth","Colorless","C",""],["122","Oddish","Grass","C",""],["123","Pidgey","Colorless","C",null],["124","Pikachu","Lightning","C",null],["125","Poliwag","Water","C",null],["126","Ponyta","Fire","C",""],["127","Qwilfish","Water","C",""],["128","Rattata","Colorless","C",null],["129","Shellder","Water","C",""],["130","Spearow","Colorless","C",null],["131","Squirtle","Water","C",null],["132","Squirtle","Water","C",null],["133","Tauros","Colorless","C",null],["134","Totodile","Water","C",null],["135","Totodile","Water","C",null],["136","Vulpix","Fire","C",null],["137","Bill's Maintenance","Trainer","U",null],["138","Copycat","Trainer","U",null],["139","Dual Ball","Trainer","U",null],["140","Energy Removal 2","Trainer","U",null],["141","Energy Restore","Trainer","U",null],["142","Mary's Impulse","Trainer","U",null],["143","Master Ball","Trainer","U",null],["144","Multi Technical Machine 01","Trainer","U",null],["145","Pokémon Nurse","Trainer","U",""],["146","Pokémon Reversal","Trainer","U",""],["147","Power Charge","Trainer","U",null],["148","Professor Elm's Training Method","Trainer","U",null],["149","Professor Oak's Research","Trainer","U",null],["150","Strength Charm","Trainer","U",""],["151","Super Scoop Up","Trainer","U",null],["152","Warp Point","Trainer","U",null],["153","Energy Search","Trainer","C",""],["154","Full Heal","Trainer","C",null],["155","Moo-Moo Milk","Trainer","C",null],["156","Potion","Trainer","C",null],["157","Switch","Trainer","C",null],["158","Darkness Energy","Energy","R",null],["159","Metal Energy","Energy","R",null],["160","Fighting Energy","Energy","",null],["161","Fire Energy","Energy","",null],["162","Grass Energy","Energy","",null],["163","Lightning Energy","Energy","",null],["164","Psychic Energy","Energy","",null],["165","Water Energy","Energy","",null]],"ecard2":[["1","Ampharos","Lightning","R",null],["2","Arcanine","Fire","R",null],["3","Ariados","Grass","R",""],["4","Azumarill","Water","R",null],["5","Bellossom","Grass","R",""],["6","Blissey","Colorless","R",null],["7","Donphan","Fighting","R",null],["8","Electrode","Lightning","R",null],["9","Elekid","Lightning","R",null],["10","Entei","Fire","R",null],["11","Espeon","Psychic","R",null],["12","Exeggutor","Grass","R",null],["13","Exeggutor","Psychic","R",null],["14","Houndoom","Fire","R",null],["15","Houndoom","Darkness","R",null],["16","Hypno","Psychic","R",null],["17","Jumpluff","Grass","R",null],["18","Jynx","Psychic","R",null],["19","Kingdra","Water","R",null],["20","Lanturn","Water","R",null],["21","Lanturn","Lightning","R",null],["22","Magneton","Metal","R",null],["23","Muk","Grass","R",null],["24","Nidoking","Fighting","R",null],["25","Ninetales","Fire","R",null],["26","Octillery","Water","R",null],["27","Parasect","Grass","R",null],["28","Porygon2","Colorless","R",null],["29","Primeape","Fighting","R",null],["30","Quagsire","Water","R",null],["31","Rapidash","Fire","R",null],["32","Scizor","Metal","R",null],["33","Slowbro","Water","R",null],["34","Slowking","Psychic","R",""],["35","Steelix","Metal","R",null],["36","Sudowoodo","Fighting","R","rev"],["37","Suicune","Water","R",null],["38","Tentacruel","Water","R",null],["39","Togetic","Colorless","R","rev"],["40","Tyranitar","Darkness","R",null],["41","Umbreon","Darkness","R",null],["42","Victreebel","Grass","R",null],["43","Vileplume","Grass","R",""],["44","Zapdos","Lightning","R",null],["45","Bellsprout","Grass","U",null],["46","Dodrio","Colorless","U",null],["47","Flaaffy","Lightning","U",null],["48","Furret","Colorless","U",null],["49","Gloom","Grass","U",null],["50","Golduck","Water","U",""],["51","Growlithe","Fire","U",""],["52","Magnemite","Metal","U",null],["53","Marill","Water","U",null],["54","Marowak","Fighting","U",null],["55","Nidorino","Grass","U",""],["56","Pupitar","Fighting","U","rev"],["57","Scyther","Grass","U",null],["58","Seadra","Water","U",null],["59","Seaking","Water","U",""],["60","Skiploom","Grass","U","rev"],["61","Smoochum","Psychic","U",null],["62","Spinarak","Grass","U",null],["63","Tyrogue","Fighting","U",null],["64","Voltorb","Lightning","U",null],["65","Weepinbell","Grass","U",""],["66","Wooper","Water","U",null],["67","Aipom","Colorless","C",""],["68","Bellsprout","Grass","C",""],["69","Chansey","Colorless","C",""],["70","Chinchou","Water","C",""],["71","Chinchou","Lightning","C",""],["72","Cubone","Fighting","C",""],["73","Doduo","Colorless","C",""],["74","Drowzee","Psychic","C",null],["75","Eevee","Colorless","C",null],["76","Exeggcute","Grass","C",""],["77","Exeggcute","Psychic","C",""],["78","Goldeen","Water","C",""],["79","Grimer","Grass","C",""],["80","Growlithe","Fire","C",null],["81","Hitmonchan","Fighting","C",null],["82","Hitmontop","Fighting","C",""],["83","Hoppip","Grass","C",null],["84","Horsea","Water","C",""],["85","Horsea","Water","C",""],["86","Houndour","Fire","C",null],["87","Houndour","Darkness","C",""],["88","Kangaskhan","Colorless","C",""],["89","Larvitar","Fighting","C",""],["90","Lickitung","Colorless","C",null],["91","Magnemite","Lightning","C",""],["92","Mankey","Fighting","C",null],["93","Mareep","Lightning","C",""],["94","Miltank","Colorless","C",""],["95","Mr. Mime","Psychic","C",""],["96","Nidoran ♂","Grass","C",""],["97","Oddish","Grass","C",null],["98","Onix","Fighting","C",""],["99","Paras","Grass","C",""],["100","Phanpy","Fighting","C",null],["101","Pinsir","Grass","C",""],["102","Ponyta","Fire","C",null],["103","Porygon","Colorless","C",""],["104","Psyduck","Water","C",null],["105","Remoraid","Water","C",""],["106","Scyther","Grass","C",""],["107","Sentret","Colorless","C",""],["108","Slowpoke","Water","C",null],["109","Smeargle","Colorless","C",""],["110","Sneasel","Darkness","C",""],["111","Spinarak","Grass","C",""],["112","Tangela","Grass","C",""],["113","Tentacool","Water","C",""],["114","Togepi","Colorless","C",""],["115","Voltorb","Lightning","C",null],["116","Vulpix","Fire","C",""],["117","Wooper","Water","C",null],["118","Apricorn Forest","Trainer","R",null],["119","Darkness Cube 01","Trainer","U",null],["120","Energy Switch","Trainer","U",null],["121","Fighting Cube 01","Trainer","U",null],["122","Fire Cube 01","Trainer","U",""],["123","Forest Guardian","Trainer","U",""],["124","Grass Cube 01","Trainer","U",""],["125","Healing Berry","Trainer","U",null],["126","Juggler","Trainer","U",null],["127","Lightning Cube 01","Trainer","U",""],["128","Memory Berry","Trainer","U",""],["129","Metal Cube 01","Trainer","U",""],["130","Pokémon Fan Club","Trainer","U",null],["131","Pokémon Park","Trainer","U",null],["132","Psychic Cube 01","Trainer","U",""],["133","Seer","Trainer","U",null],["134","Super Energy Removal 2","Trainer","U",null],["135","Time Shard","Trainer","U",null],["136","Town Volunteers","Trainer","U",null],["137","Traveling Salesman","Trainer","U",null],["138","Undersea Ruins","Trainer","U",null],["139","Power Plant","Trainer","U",null],["140","Water Cube 01","Trainer","U",null],["141","Weakness Guard","Trainer","U",null],["142","Darkness Energy","Energy","R",null],["143","Metal Energy","Energy","R",""],["144","Rainbow Energy","Energy","R",null],["145","Boost Energy","Energy","U",""],["146","Crystal Energy","Energy","U",null],["147","Warp Energy","Energy","U",null],["148","Kingdra","Colorless","R",null],["149","Lugia","Colorless","R",null],["150","Nidoking","Colorless","R",null],["H1","Ampharos","Lightning","R",null],["H2","Arcanine","Fire","R",null],["H3","Ariados","Grass","R",null],["H4","Azumarill","Water","R",null],["H5","Bellossom","Grass","R",null],["H6","Blissey","Colorless","R",null],["H7","Electrode","Lightning","R",null],["H8","Entei","Fire","R",null],["H9","Espeon","Psychic","R",null],["H10","Exeggutor","Grass","R",null],["H11","Houndoom","Darkness","R",null],["H12","Hypno","Psychic","R",null],["H13","Jumpluff","Grass","R",null],["H14","Kingdra","Water","R",null],["H15","Lanturn","Lightning","R",null],["H16","Magneton","Metal","R",null],["H17","Muk","Grass","R",null],["H18","Nidoking","Fighting","R",null],["H19","Ninetales","Fire","R",null],["H20","Octillery","Water","R",null],["H21","Scizor","Metal","R",null],["H22","Slowking","Psychic","R",null],["H23","Steelix","Metal","R",null],["H24","Sudowoodo","Fighting","R",null],["H25","Suicune","Water","R",null],["H26","Tentacruel","Water","R",null],["H27","Togetic","Colorless","R",null],["H28","Tyranitar","Darkness","R",null],["H29","Umbreon","Darkness","R",null],["H30","Victreebel","Grass","R",null],["H31","Vileplume","Grass","R",null],["H32","Zapdos","Lightning","R",null]],"neo4":[["1","Dark Ampharos","Lightning","R",null],["2","Dark Crobat","Grass","R",null],["3","Dark Donphan","Fighting","R",null],["4","Dark Espeon","Psychic","R",null],["5","Dark Feraligatr","Water","R",null],["6","Dark Gengar","Psychic","R",null],["7","Dark Houndoom","Fire","R",null],["8","Dark Porygon2","Colorless","R",null],["9","Dark Scizor","Metal","R",null],["10","Dark Typhlosion","Fire","R",null],["11","Dark Tyranitar","Fighting","R",null],["12","Light Arcanine","Fire","R",null],["13","Light Azumarill","Water","R",null],["14","Light Dragonite","Colorless","R",null],["15","Light Togetic","Colorless","R",null],["16","Miracle Energy","Energy","R",null],["17","Dark Ariados","Grass","R",null],["18","Dark Magcargo","Fire","R",null],["19","Dark Omastar","Water","R",null],["20","Dark Slowking","Psychic","R",null],["21","Dark Ursaring","Colorless","R",null],["22","Light Dragonair","Colorless","R",null],["23","Light Lanturn","Lightning","R",null],["24","Light Ledian","Grass","R",null],["25","Light Machamp","Fighting","R",""],["26","Light Piloswine","Water","R",null],["27","Unown [G]","Psychic","R",null],["28","Unown [H]","Psychic","R",null],["29","Unown [W]","Psychic","R",null],["30","Unown [X]","Psychic","R",null],["31","Chansey","Colorless","U",null],["32","Dark Croconaw","Water","U",null],["33","Dark Exeggutor","Psychic","U",""],["34","Dark Flaaffy","Lightning","U",""],["35","Dark Forretress","Grass","U",""],["36","Dark Haunter","Psychic","U",null],["37","Dark Omanyte","Water","U",""],["38","Dark Pupitar","Fighting","U",""],["39","Dark Quilava","Fire","U",""],["40","Dark Wigglytuff","Colorless","U",null],["41","Heracross","Grass","U",""],["42","Hitmonlee","Fighting","U",""],["43","Houndour","Darkness","U",""],["44","Jigglypuff","Colorless","U",null],["45","Light Dewgong","Water","U",""],["46","Light Flareon","Fire","U",null],["47","Light Golduck","Water","U",""],["48","Light Jolteon","Lightning","U",null],["49","Light Machoke","Fighting","U",null],["50","Light Ninetales","Fire","U",null],["51","Light Slowbro","Psychic","U",null],["52","Light Vaporeon","Water","U",null],["53","Light Venomoth","Grass","U",""],["54","Light Wigglytuff","Colorless","U",null],["55","Scyther","Grass","U",""],["56","Togepi","Colorless","U",null],["57","Unown [C]","Psychic","U",null],["58","Unown [P]","Psychic","U",null],["59","Unown [Q]","Psychic","U",null],["60","Unown [Z]","Psychic","U",null],["61","Cyndaquil","Fire","C",""],["62","Dark Octillery","Water","C",""],["63","Dratini","Colorless","C",""],["64","Exeggcute","Psychic","C",""],["65","Gastly","Psychic","C",""],["66","Girafarig","Colorless","C",""],["67","Gligar","Fighting","C",""],["68","Growlithe","Fire","C",""],["69","Hitmonchan","Fighting","C",""],["70","Larvitar","Fighting","C",""],["71","Ledyba","Grass","C",""],["72","Light Sunflora","Grass","C",""],["73","Machop","Fighting","C",""],["74","Mantine","Water","C",""],["75","Mareep","Lightning","C",""],["76","Phanpy","Fighting","C",""],["77","Pineco","Grass","C",""],["78","Porygon","Colorless","C",""],["79","Psyduck","Water","C",null],["80","Remoraid","Water","C",""],["81","Seel","Water","C",""],["82","Slugma","Fire","C",""],["83","Sunkern","Grass","C",""],["84","Swinub","Water","C",""],["85","Totodile","Water","C",""],["86","Unown [L]","Psychic","C",null],["87","Unown [S]","Psychic","C",null],["88","Unown [T]","Psychic","C",null],["89","Unown [V]","Psychic","C",null],["90","Venonat","Grass","C",""],["91","Vulpix","Fire","C",""],["92","Broken Ground Gym","Trainer","R",null],["93","EXP.ALL","Trainer","R",null],["94","Impostor Professor Oak's Invention","Trainer","R",null],["95","Radio Tower","Trainer","R",null],["96","Thought Wave Machine","Trainer","R",null],["97","Counterattack Claws","Trainer","U",""],["98","Energy Amplifier","Trainer","U",null],["99","Energy Stadium","Trainer","U",null],["100","Lucky Stadium","Trainer","U",null],["101","Magnifier","Trainer","U",null],["102","Pokémon Personality Test","Trainer","U",null],["103","Team Rocket's Evil Deeds","Trainer","U",null],["104","Heal Powder","Trainer","C",""],["105","Mail from Bill","Trainer","C",null],["106","Shining Celebi","Grass","R",null],["107","Shining Charizard","Fire","R",null],["108","Shining Kabutops","Fighting","R",null],["109","Shining Mewtwo","Psychic","R",null],["110","Shining Noctowl","Colorless","R",null],["111","Shining Raichu","Lightning","R",null],["112","Shining Steelix","Metal","R",null],["113","Shining Tyranitar","Darkness","R",null]]};
 {
 const SETS=[["ecard1","Expedition","expedition"],["ecard2","Aquapolis","aquapolis"],["neo4","Neo Destiny","neo-destiny"]];
 const COL={Grass:"#7cc05a",Fire:"#f0805a",Water:"#6fb0ea",Lightning:"#f6d54a",Psychic:"#b787dc",Fighting:"#d0925a",Darkness:"#4a4f5e",Metal:"#aab4c0",Colorless:"#ddd6c4",Trainer:"#e8e2d2",Energy:"#8fd0c0"};
-const RAR={R:"★",U:"◆",C:"●"};
+const RAR={R:"★",U:"◆",C:"●"},RN={R:"Rara",U:"Non comune",C:"Comune"};
+const COND=[["MT","Mint","#2f6fe0","Perfetta, come appena uscita dalla bustina: al massimo piccoli difetti di stampa, come una centratura non perfetta."],
+["NM","Near Mint","#1597b0","Quasi perfetta: segni minimi, nessun alone visibile sulla superficie."],
+["EX","Excellent","#1f9e57","Usata qualche volta senza bustina: qualche puntino bianco su bordi e angoli."],
+["GD","Good","#86c03a","Graffi sulla superficie, bordi e angoli consumati in modo visibile."],
+["LP","Light Played","#e3bd17","Usata a lungo senza bustina: usura evidente ovunque, ma ancora giocabile."],
+["PL","Played","#ef8424","Usura forte, pieghe, carta non più piatta del tutto."],
+["PO","Poor","#e0393e","Danni gravi: bordi sbiancati o anneriti, scritte a penna, acqua, strappi."]];
+const CI=Object.fromEntries(COND.map((c,i)=>[c[0],i])),LT=new Set(["GD","LP"]);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const glyph='<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#000" stroke-width="3"/><path d="M2 20h13M25 20h13" stroke="#000" stroke-width="3"/><circle cx="20" cy="20" r="5" fill="none" stroke="#000" stroke-width="3"/></svg>';
-let cur="ecard1",flt="all";
 const $=id=>document.getElementById(id);
+const LS="album-collezione-v1";
+let cur="ecard1",flt="all",edit=false,BASE={},COLL={};
+const key=n=>cur+":"+n,copies=n=>COLL[key(n)]||[];
+const best=l=>l.reduce((b,x)=>!b||CI[x.c]<CI[b.c]?x:b,null);
+const img=n=>`https://images.pokemontcg.io/${cur}/${encodeURIComponent(n)}`;
+function rng(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}
+ return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);h^=h>>>16;return(h>>>0)/4294967296}}
+function wear(lv,seed){if(lv<1)return"";const R=rng(seed),W=630,H=880,r=(a,b)=>a+R()*(b-a);let s="";
+ const cr=[0,7,14,22,32,46,64][lv],co=[0,.55,.7,.75,.8,.85,.9][lv];
+ [[0,0],[W,0],[0,H],[W,H]].forEach(([x,y],i)=>{if(lv===1&&i!==Math.floor(R()*4))return;s+=`<circle cx="${x}" cy="${y}" r="${(cr*r(.7,1.2)).toFixed(1)}" fill="#fff" fill-opacity="${co}" filter="url(#wb1)"/>`});
+ if(lv>=2){const sw=[0,0,6,9,12,16,24][lv];let d=[];for(let i=0;i<40;i++)d.push(Math.round(r(10,lv>=5?140:70)),Math.round(r(30,lv>=5?80:260)));
+  s+=`<rect x="${sw/2}" y="${sw/2}" width="${W-sw}" height="${H-sw}" rx="26" fill="none" stroke="#fff" stroke-opacity="${[0,0,.5,.6,.7,.8,.9][lv]}" stroke-width="${sw}" stroke-dasharray="${d.join(" ")}" stroke-dashoffset="${Math.round(r(0,500))}" filter="url(#wb1)"/>`}
+ if(lv===6)s+=`<rect x="3" y="3" width="${W-6}" height="${H-6}" rx="26" fill="none" stroke="#2a2016" stroke-opacity=".5" stroke-width="10" stroke-dasharray="${Math.round(r(60,160))} ${Math.round(r(80,200))}" filter="url(#wb1)"/>`;
+ if(lv>=3)s+=`<rect width="${W}" height="${H}" fill="#fff" fill-opacity="${[0,0,0,.04,.07,.1,.14][lv]}"/>`;
+ const ns=[0,0,0,3,6,10,16][lv];for(let i=0;i<ns;i++){const x=r(30,W-30),y=r(30,H-30),a=r(0,Math.PI),L=r(50,lv>=5?320:200);
+  s+=`<line x1="${x.toFixed(0)}" y1="${y.toFixed(0)}" x2="${(x+Math.cos(a)*L).toFixed(0)}" y2="${(y+Math.sin(a)*L).toFixed(0)}" stroke="#fff" stroke-opacity="${r(.25,.55).toFixed(2)}" stroke-width="${r(1.2,lv>=5?4:2.6).toFixed(1)}" stroke-linecap="round"/>`}
+ const nc=lv===5?1:lv===6?3:0;for(let i=0;i<nc;i++){const v=R()<.5,p=v?r(120,W-120):r(150,H-150),q=r(-60,60);
+  const [x1,y1,x2,y2]=v?[p,0,p+q,H]:[0,p,W,p+q];
+  s+=`<line x1="${x1|0}" y1="${y1|0}" x2="${x2|0}" y2="${y2|0}" stroke="#fff" stroke-opacity=".6" stroke-width="5" filter="url(#wb1)"/><line x1="${(x1+(v?5:0))|0}" y1="${(y1+(v?0:5))|0}" x2="${(x2+(v?5:0))|0}" y2="${(y2+(v?0:5))|0}" stroke="#1d150c" stroke-opacity=".35" stroke-width="4" filter="url(#wb1)"/>`}
+ const nst=lv===5?1:lv===6?3:0;for(let i=0;i<nst;i++)s+=`<ellipse cx="${r(80,W-80)|0}" cy="${r(80,H-80)|0}" rx="${r(50,lv===6?150:90)|0}" ry="${r(40,lv===6?120:80)|0}" fill="url(#stain)" style="mix-blend-mode:multiply"/>`;
+ if(lv===6){const x=r(200,W-200);s+=`<path d="M${x|0} 0 l${r(-20,20)|0} 40 l${r(-25,25)|0} 35" stroke="#fff" stroke-width="7" fill="none" stroke-opacity=".85"/>`}
+ return`<svg class="wear" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${s}</svg>`}
+function slot(r){const [n,name,t]=r,l=copies(n);
+ if(!l.length)return`<div class="slot empty" data-n="${esc(n)}" role="button" tabindex="0" aria-label="${esc(name)} ${esc(n)}, mancante"><span class="no">${esc(n)}</span><span class="nm">${esc(name)}</span><img loading="lazy" src="${img(n)}.png" alt=""><span class="mn">${esc(n)}</span></div>`;
+ const b=best(l),c=COND[CI[b.c]],lv=CI[b.c];
+ return`<div class="slot card lv${lv}" data-n="${esc(n)}" role="button" tabindex="0" aria-label="${esc(name)} ${esc(n)}, migliore ${c[1]}, ${l.length} ${l.length>1?"copie":"copia"}" style="--c:${COL[t]||COL.Colorless};--cc:${c[2]}"><div class="cw"><div class="top">${esc(name)}</div><div class="art"></div><div class="ft"><span>${esc(n)}</span><span>${RAR[r[3]]||""}</span></div><img class="ci" loading="lazy" src="${img(n)}.png" alt="">${wear(lv,key(n)+":"+b.c)}${b.r?'<div class="rev"></div>':""}${l.some(x=>x.r)?'<span class="tag">Reverse</span>':""}</div><span class="cb${LT.has(b.c)?" lt":""}">${b.c}</span>${l.length>1?`<span class="qt">×${l.length}</span>`:""}</div>`}
 const pages=$("pages");
-function slot(r){const [n,name,t,ra,o]=r;
- const src=`https://images.pokemontcg.io/${cur}/${encodeURIComponent(n)}`;
- if(o===null) return `<div class="slot empty"><span class="no">${esc(n)}</span><span class="nm">${esc(name)}</span><img loading="lazy" src="${src}.png" alt="${esc(name)} ${esc(n)} (mancante)"><span class="mn">${esc(n)}</span></div>`;
- const dk=t==="Darkness"?" dk":"";
- return `<div class="slot card${dk}" data-n="${esc(n)}" data-big="${src}_hires.png" style="--c:${COL[t]||COL.Colorless}" title="${esc(name)} #${esc(n)}"><div class="top"><span>${esc(name)}</span></div><div class="art">${glyph}</div><div class="ft"><span>${esc(n)}</span><span>${RAR[ra]||""}</span></div><img loading="lazy" src="${src}.png" alt="${esc(name)} ${esc(n)}">${o==="rev"?'<div class="rev"></div><span class="tag">Reverse</span>':""}</div>`}
-function render(keep){
- const rows=DATA[cur],own=rows.filter(r=>r[4]!==null).length;
- $("cnt").textContent=`${own} / ${rows.length}`;$("cntl").textContent="carte presenti";
- $("mt").style.width=(own/rows.length*100).toFixed(1)+"%";
- const list=rows.filter(r=>flt==="all"||(flt==="own")===(r[4]!==null));
- let h="";for(let i=0;i<list.length;i+=9){h+=`<section class="pg"><div class="grid">${list.slice(i,i+9).map(slot).join("")}</div><div class="pgn">Pagina ${i/9+1}</div></section>`}
+function counts(s){return DATA[s].filter(r=>(COLL[s+":"+r[0]]||[]).length).length}
+function render(keep){const rows=DATA[cur],own=counts(cur),sl=pages.scrollLeft;
+ $("cnt").textContent=`${own} / ${rows.length}`;$("cntl").textContent="carte presenti";$("mt").style.width=(own/rows.length*100).toFixed(1)+"%";
+ const list=rows.filter(r=>flt==="all"||(flt==="own")===(copies(r[0]).length>0));
+ let h="";for(let i=0;i<list.length;i+=9)h+=`<section class="pg"><div class="grid">${list.slice(i,i+9).map(slot).join("")}</div><div class="pgn">Pagina ${i/9+1}</div></section>`;
  pages.innerHTML=h||'<section class="pg"><p class="pgn">Nessuna carta</p></section>';
- if(!keep)pages.scrollLeft=0;upd();
- document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.s===cur));
+ pages.scrollLeft=keep?sl:0;upd();
+ $("tabs").innerHTML=SETS.map(([s,n])=>`<button role="tab" data-s="${s}" aria-selected="${s===cur}">${n}<small>${counts(s)}</small></button>`).join("");
  document.body.dataset.set=cur}
 function per(){return innerWidth<=700?1:2}
-function idx(){const p=pages.children[0];if(!p)return 0;return Math.round(pages.scrollLeft/(p.offsetWidth+14))}
-function upd(){const n=pages.children.length,i=idx(),k=per();
- $("pos").textContent=`Pagine ${i+1}${k>1&&i+1<n?"–"+(i+2):""} di ${n}`;$("prev").disabled=i<=0;$("next").disabled=i+k>=n}
-function go(d){const k=per(),t=pages.children[Math.max(0,Math.min(pages.children.length-1,idx()+d*k))];if(t)pages.scrollTo({left:t.offsetLeft-pages.offsetLeft-(t.offsetLeft?0:0),behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})}
-$("tabs").innerHTML=SETS.map(([s,n])=>{const r=DATA[s];return `<button role="tab" data-s="${s}">${n}<small>${r.filter(x=>x[4]!==null).length}</small></button>`}).join("");
+function idx(){const p=pages.children[0];return p?Math.round(pages.scrollLeft/(p.offsetWidth+14)):0}
+function upd(){const n=pages.children.length,i=idx(),k=per();$("pos").textContent=`Pagine ${i+1}${k>1&&i+1<n?"–"+(i+2):""} di ${n}`;$("prev").disabled=i<=0;$("next").disabled=i+k>=n}
+function go(d){const t=pages.children[Math.max(0,Math.min(pages.children.length-1,idx()+d*per()))];if(t)pages.scrollTo({left:t.offsetLeft-pages.offsetLeft,behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})}
+$("legend").innerHTML=COND.map(c=>`<li style="--k:${c[2]}"><i></i><b>${c[0]}</b>${c[1]}</li>`).join("");
 $("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;cur=b.dataset.s;location.hash=SETS.find(s=>s[0]===cur)[2];render()});
 $("flt").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;flt=b.dataset.f;document.querySelectorAll("#flt button").forEach(x=>x.setAttribute("aria-pressed",x===b));render()});
+$("edit").onclick=()=>{edit=!edit;$("edit").setAttribute("aria-pressed",edit);$("edit").textContent=edit?"Modifica attiva":"Modifica";if(open)panel()};
 $("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
 let tm;pages.addEventListener("scroll",()=>{clearTimeout(tm);tm=setTimeout(upd,80)});
-addEventListener("keydown",e=>{if(e.key==="ArrowLeft")go(-1);if(e.key==="ArrowRight")go(1)});
 addEventListener("resize",upd);
 document.addEventListener("error",e=>{if(e.target.tagName==="IMG"&&e.target.closest(".slot"))e.target.remove()},true);
+function save(){try{localStorage.setItem(LS,JSON.stringify(COLL))}catch(e){}dirty()}
+function dirty(){$("dirty").hidden=JSON.stringify(COLL)===JSON.stringify(BASE)}
+$("exp").onclick=async()=>{const t=JSON.stringify(COLL);try{await navigator.clipboard.writeText(t);$("expmsg").textContent="Copiato: incollalo in collection.json nella repo."}catch(e){$("expmsg").textContent="Copia non riuscita."}};
+$("rst").onclick=()=>{COLL=JSON.parse(JSON.stringify(BASE));try{localStorage.removeItem(LS)}catch(e){}dirty();render(true)};
+/* viewer */
 const lb=$("lb"),c3=$("c3"),c3w=$("c3w"),stage=$("stage");
-const RN={R:"Rara",U:"Non comune",C:"Comune"};
-let base=0,spin=0,tx=0,ty=0,drag=null;
+let open=null,sel=0,base=0,spin=0,tx=0,ty=0,drag=null;
 const apply=()=>{c3.style.transform=`rotateX(${tx}deg) rotateY(${base+spin+ty}deg)`};
-function openCard(c){const r=DATA[cur].find(x=>x[0]===c.dataset.n);if(!r)return;
- const setName=SETS.find(s=>s[0]===cur)[1];
- $("fimg").src=c.dataset.big;$("fimg").alt=c.title;
- $("cap").innerHTML=`<b>${esc(r[1])}</b><span>${esc(setName)} ${esc(r[0])} · ${RN[r[3]]||""} · ${r[4]==="rev"?"Presente, reverse":"Presente"}</span>`;
- c3.classList.toggle("rv",r[4]==="rev");base=0;spin=0;tx=0;ty=0;c3.classList.add("drag");apply();
- c3w.style.animation="none";void c3w.offsetWidth;c3w.style.animation="";
- lb.classList.add("on");requestAnimationFrame(()=>c3.classList.remove("drag"))}
-function closeCard(){lb.classList.remove("on")}
-pages.addEventListener("click",e=>{const c=e.target.closest(".card");if(c)openCard(c)});
+function front(){const l=copies(open[0]),c=l[sel],fr=$("fr");
+ fr.className="face front"+(c?` lv${CI[c.c]}`:" miss")+(c&&c.r?" rv":"");
+ c3.style.setProperty("--cc",c?COND[CI[c.c]][2]:"transparent");
+ $("fwear").innerHTML=c?wear(CI[c.c],key(open[0])+":"+c.c):"";
+ const set=SETS.find(s=>s[0]===cur)[1];
+ $("cap").innerHTML=`<b>${esc(open[1])}</b><span>${esc(set)} ${esc(open[0])} · ${RN[open[3]]||""} · ${c?`${COND[CI[c.c]][1]}${c.r?", reverse":""}, ${c.l==="eng"?"inglese":"italiano"}`:"Non ce l'hai"}</span>`}
+function panel(){const l=copies(open[0]),p=$("panel");
+ let h=`<h2>${l.length?`Le tue copie (${l.length})`:"Non ce l'hai"}</h2><p class="ph">${edit?"Scegli la condizione di ogni copia. Nel raccoglitore si vede la migliore.":l.length?"Tocca una copia per vederla. Attiva Modifica per cambiarle.":"Attiva Modifica per aggiungerla."}</p>`;
+ l.forEach((c,i)=>{const k=COND[CI[c.c]];
+  h+=`<div class="cp${i===sel?" sel":""}" data-i="${i}" style="--cc:${k[2]}"><div class="cph"><span>Copia ${i+1} · ${k[0]} <small>${k[1]}</small></span><small>${c.l==="eng"?"ENG":"ITA"}${c.r?" · Reverse":""}</small></div>`;
+  if(edit)h+=`<div class="chips">${COND.map(x=>`<button class="chip" style="--k:${x[2]}" data-c="${x[0]}" aria-pressed="${x[0]===c.c}" title="${x[1]}">${x[0]}</button>`).join("")}</div><div class="row2"><button data-a="lang">${c.l==="eng"?"Inglese":"Italiano"}</button><button data-a="rev" aria-pressed="${!!c.r}">Reverse</button><button class="del" data-a="del">Rimuovi</button></div>`;
+  h+=`</div>`});
+ if(edit)h+=`<button class="addc" data-a="add">+ Aggiungi copia</button>`;
+ const c=l[sel];if(c){const k=COND[CI[c.c]];h+=`<p class="cdesc"><b>${k[1]}:</b> ${k[3]}</p>`}
+ p.innerHTML=h}
+$("panel").addEventListener("click",e=>{const l=COLL[key(open[0])]||(COLL[key(open[0])]=[]);const cp=e.target.closest(".cp"),i=cp?+cp.dataset.i:-1,a=e.target.closest("[data-a]")?.dataset.a,ch=e.target.closest(".chip");
+ if(a==="add"){l.push({c:"NM",l:"ita",r:0});sel=l.length-1}
+ else if(ch&&i>=0){l[i].c=ch.dataset.c;sel=i}
+ else if(a==="lang"){l[i].l=l[i].l==="eng"?"ita":"eng";sel=i}
+ else if(a==="rev"){l[i].r=l[i].r?0:1;sel=i}
+ else if(a==="del"){l.splice(i,1);sel=Math.max(0,Math.min(sel,l.length-1))}
+ else if(i>=0){sel=i;base=0;spin=0;apply();front();panel();return}
+ else return;
+ if(!l.length)delete COLL[key(open[0])];save();front();panel();render(true)});
+function openCard(n){const r=DATA[cur].find(x=>x[0]===n);if(!r)return;open=r;const l=copies(n),b=best(l);sel=b?l.indexOf(b):0;
+ $("fimg").src=img(n)+"_hires.png";$("fimg").alt=`${r[1]} ${n}`;base=0;spin=0;tx=0;ty=0;c3.classList.add("drag");apply();front();panel();
+ c3w.style.animation="none";void c3w.offsetWidth;c3w.style.animation="";lb.classList.add("on");document.body.style.overflow="hidden";requestAnimationFrame(()=>c3.classList.remove("drag"));$("xb").focus()}
+function closeCard(){lb.classList.remove("on");document.body.style.overflow="";open=null}
+pages.addEventListener("click",e=>{const s=e.target.closest(".slot");if(s)openCard(s.dataset.n)});
+pages.addEventListener("keydown",e=>{const s=e.target.closest(".slot");if(s&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openCard(s.dataset.n)}});
 $("xb").onclick=closeCard;
-lb.addEventListener("click",e=>{if(e.target===lb)closeCard()});
-addEventListener("keydown",e=>{if(!lb.classList.contains("on"))return;if(e.key==="Escape")closeCard();if(e.key===" "||e.key==="Enter"){e.preventDefault();base+=180;apply()}});
+lb.addEventListener("click",e=>{if(e.target===lb||e.target.classList.contains("lbin"))closeCard()});
+addEventListener("keydown",e=>{if(!open){if(e.key==="ArrowLeft")go(-1);if(e.key==="ArrowRight")go(1);return}if(e.key==="Escape")closeCard()});
 const still=matchMedia("(prefers-reduced-motion:reduce)").matches;
-function glare(e){const b=c3.getBoundingClientRect(),px=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width)),py=Math.min(1,Math.max(0,(e.clientY-b.top)/b.height));
- c3.style.setProperty("--gx",(px*100).toFixed(1)+"%");c3.style.setProperty("--gy",(py*100).toFixed(1)+"%");return [px,py]}
-lb.addEventListener("pointermove",e=>{const [px,py]=glare(e);
- if(drag){const dx=e.clientX-drag.x;if(Math.abs(dx)>6)drag.moved=true;spin=dx*.7;tx=0;ty=0;apply();return}
+function glare(e){const b=c3.getBoundingClientRect(),px=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width)),py=Math.min(1,Math.max(0,(e.clientY-b.top)/b.height));c3.style.setProperty("--gx",(px*100).toFixed(1)+"%");c3.style.setProperty("--gy",(py*100).toFixed(1)+"%");return[px,py]}
+stage.addEventListener("pointermove",e=>{const [px,py]=glare(e);if(drag){const dx=e.clientX-drag.x;if(Math.abs(dx)>6)drag.moved=true;spin=dx*.7;tx=0;ty=0;apply();return}
  if(still||e.pointerType!=="mouse")return;tx=(.5-py)*22;ty=(px-.5)*22;c3.classList.add("hov");apply()});
 c3.addEventListener("pointerdown",e=>{drag={x:e.clientX,moved:false};c3.classList.add("drag");c3.setPointerCapture(e.pointerId)});
-function endDrag(){if(!drag)return;const m=drag.moved;drag=null;c3.classList.remove("drag","hov");
- base=m?Math.round((base+spin)/180)*180:base+180;spin=0;tx=0;ty=0;apply()}
+function endDrag(){if(!drag)return;const m=drag.moved;drag=null;c3.classList.remove("drag","hov");base=m?Math.round((base+spin)/180)*180:base+180;spin=0;tx=0;ty=0;apply()}
 c3.addEventListener("pointerup",endDrag);c3.addEventListener("pointercancel",endDrag);
 stage.addEventListener("pointerleave",()=>{if(drag)return;c3.classList.remove("hov");tx=0;ty=0;apply()});
-function fromHash(){const h=location.hash.slice(1),s=SETS.find(x=>x[2]===h);if(s&&s[0]!==cur){cur=s[0];render()}}
+function fromHash(){const s=SETS.find(x=>x[2]===location.hash.slice(1));if(s&&s[0]!==cur){cur=s[0];render()}}
 addEventListener("hashchange",fromHash);
-const h0=SETS.find(x=>x[2]===location.hash.slice(1));if(h0)cur=h0[0];render();
+const h0=SETS.find(x=>x[2]===location.hash.slice(1));if(h0)cur=h0[0];
+(async()=>{try{BASE=await (await fetch("collection.json",{cache:"no-cache"})).json()}catch(e){BASE={}}
+ let loc=null;try{loc=JSON.parse(localStorage.getItem(LS))}catch(e){}
+ COLL=JSON.parse(JSON.stringify(loc||BASE));dirty();render()})();
 }
 </script></body></html>
