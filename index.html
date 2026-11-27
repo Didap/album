@@ -161,7 +161,7 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-o
 <div class="kpis"><div class="kpi"><span>Valore della collezione</span><b id="kv">—</b><small id="kvs"></small></div>
 <div class="kpi"><span>Per completare (prezzi minimi)</span><b id="kc">—</b><small id="kcs"></small></div>
 <div class="kpi"><span>Per completare (prezzi tipici)</span><b id="kt">—</b><small id="kts"></small></div></div>
-<div class="leg2"><span style="--k:var(--vinyl)"><i></i>Valore collezione</span><span style="--k:#ef8424"><i></i>Costo per completare (tipico)</span><span style="--k:var(--mute)"><i class="d"></i>Proiezione (stima)</span></div>
+<div class="qh" style="margin:0 0 6px"><div class="seg" id="cser"><button data-k="v" aria-pressed="true">Valore collezione</button><button data-k="c" aria-pressed="false">Costo per completare</button></div><div class="leg2" style="margin:0"><span style="--k:var(--mute)"><i></i>Storico</span><span style="--k:var(--mute)"><i class="d"></i>Proiezione (stima)</span></div></div>
 <div class="fig" id="fig"><svg id="chart" role="img" aria-label="Andamento del valore della collezione e del costo per completarla"></svg></div>
 <p class="qd" id="qnote"></p>
 <details class="qd"><summary>Come viene calcolata e valutazioni salvate</summary>
@@ -264,15 +264,16 @@ function showQ(){const last=CHECKS[CHECKS.length-1],prev=CHECKS[CHECKS.length-2]
  draw()}
 $("mults").addEventListener("change",e=>{const k=e.target.dataset.m;if(!k)return;const v=parseFloat(e.target.value);if(!(v>=0))return;MUL[k]=v;try{localStorage.setItem(LSM,JSON.stringify(MUL))}catch(e){}showQ()});
 function series(){const pts=[];const real=new Set();
- CHECKS.forEach(c=>{const t=+new Date(c.t);[[30,c.h[30]],[7,c.h[7]],[1,c.h[1]]].forEach(([d,x])=>{if(x&&x[0])pts.push({t:t-d*864e5,v:x[0],c:x[1],est:1})});pts.push({t,v:c.v,c:c.ctyp});real.add(t)});
+ CHECKS.forEach(c=>{const t=+new Date(c.t);[[30,c.h[30]],[7,c.h[7]]].forEach(([d,x])=>{if(x&&x[0])pts.push({t:t-d*864e5,v:x[0],c:x[1],est:1})});pts.push({t,v:c.v,c:c.ctyp});real.add(t)});
  pts.sort((a,b)=>a.t-b.t);const out=[];for(const p of pts){const o=out[out.length-1];if(o&&Math.abs(o.t-p.t)<864e5*.5){if(!p.est)out[out.length-1]=p}else out.push(p)}return out}
 function fit(pts,key){const n=pts.length;if(n<2)return null;const t0=pts[0].t;let sx=0,sy=0,sxx=0,sxy=0;pts.forEach(p=>{const x=(p.t-t0)/864e5,y=p[key];sx+=x;sy+=y;sxx+=x*x;sxy+=x*y});
  const d=n*sxx-sx*sx;if(!d)return null;const m=(n*sxy-sx*sy)/d,b=(sy-m*sx)/n;return t=>Math.max(0,m*((t-t0)/864e5)+b)}
-const chart=$("chart");
+const chart=$("chart");let SER="v";
+$("cser").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;SER=b.dataset.k;document.querySelectorAll("#cser button").forEach(x=>x.setAttribute("aria-pressed",x===b));draw()});
 function draw(){const W=chart.clientWidth,H=chart.clientHeight;if(!W)return;const pts=series();
  if(!pts.length){chart.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="currentColor" opacity=".6" font-size="14">Il grafico compare dopo la prima valutazione</text>`;return}
  const last=pts[pts.length-1].t,fut=[30,90].map(d=>last+d*864e5),fv=fit(pts,"v"),fc=fit(pts,"c");
- const all=pts.flatMap(p=>[p.v,p.c]).concat(fv?fut.map(fv):[],fc?fut.map(fc):[]);
+ const all=pts.map(p=>p[SER]).concat((SER==="v"?fv:fc)?fut.map(SER==="v"?fv:fc):[]);
  const t0=pts[0].t,t1=fut[1],ymax=Math.max(...all)*1.1||1,pl=W<520?44:64,pr=12,pt=12,pb=28;
  const X=t=>pl+(t-t0)/(t1-t0||1)*(W-pl-pr),Y=v=>pt+(1-v/ymax)*(H-pt-pb);
  let s="";const ticks=4;for(let i=0;i<=ticks;i++){const v=ymax*i/ticks,y=Y(v);s+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="currentColor" opacity=".1"/><text x="${pl-6}" y="${y+4}" text-anchor="end" font-size="12" fill="currentColor" opacity=".6">${Math.round(v).toLocaleString("it-IT")}€</text>`}
@@ -281,7 +282,7 @@ function draw(){const W=chart.clientWidth,H=chart.clientHeight;if(!W)return;cons
  const line=(k,col)=>{const d=pts.map((p,i)=>`${i?"L":"M"}${X(p.t).toFixed(1)} ${Y(p[k]).toFixed(1)}`).join("");let o=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
   pts.forEach(p=>o+=`<circle cx="${X(p.t)}" cy="${Y(p[k])}" r="${p.est?2.5:4}" fill="${p.est?"var(--page)":col}" stroke="${col}" stroke-width="2"/>`);
   const f=k==="v"?fv:fc;if(f){const lp=pts[pts.length-1];o+=`<path d="M${X(lp.t)} ${Y(lp[k])}L${X(fut[0])} ${Y(f(fut[0]))}L${X(fut[1])} ${Y(f(fut[1]))}" fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="6 5" opacity=".7"/>`}return o};
- s+=line("c","#ef8424")+line("v","var(--vinyl)");chart.innerHTML=s}
+ s+=SER==="v"?line("v","var(--vinyl)"):line("c","#ef8424");chart.innerHTML=s}
 const ro=new ResizeObserver(draw);ro.observe($("fig"));
 function prBlock(){if(!open)return"";const cm=PRICES[key(open[0])];const q=encodeURIComponent(`${open[1]} ${open[0]} ${SETS.find(s=>s[0]===cur)[1]}`);
  const links=`<a href="https://www.cardmarket.com/it/Pokemon/Products/Search?searchString=${encodeURIComponent(open[1])}" target="_blank" rel="noopener">Cardmarket</a> · <a href="https://www.ebay.it/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">Venduti eBay.it</a> · <a href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">eBay.com</a>`;
