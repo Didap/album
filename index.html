@@ -162,8 +162,8 @@ function rng(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imu
 function wear(lv,seed){if(lv<1)return"";const R=rng(seed),W=630,H=880,r=(a,b)=>a+R()*(b-a);let s="";
  const cr=[0,7,14,22,32,46,64][lv],co=[0,.55,.7,.75,.8,.85,.9][lv];
  [[0,0],[W,0],[0,H],[W,H]].forEach(([x,y],i)=>{if(lv===1&&i!==Math.floor(R()*4))return;s+=`<circle cx="${x}" cy="${y}" r="${(cr*r(.7,1.2)).toFixed(1)}" fill="#fff" fill-opacity="${co}" filter="url(#wb1)"/>`});
- if(lv>=2){const sw=[0,0,6,9,12,16,24][lv];let d=[];for(let i=0;i<40;i++)d.push(Math.round(r(10,lv>=5?140:70)),Math.round(r(30,lv>=5?80:260)));
-  s+=`<rect x="${sw/2}" y="${sw/2}" width="${W-sw}" height="${H-sw}" rx="26" fill="none" stroke="#fff" stroke-opacity="${[0,0,.5,.6,.7,.8,.9][lv]}" stroke-width="${sw}" stroke-dasharray="${d.join(" ")}" stroke-dashoffset="${Math.round(r(0,500))}" filter="url(#wb1)"/>`}
+ if(lv>=2){const sw=[0,0,8,11,14,18,24][lv];let d=[];for(let i=0;i<40;i++)d.push(Math.round(r(10,lv>=5?140:70)),Math.round(r(30,lv>=5?80:260)));
+  s+=`<rect x="${sw/2}" y="${sw/2}" width="${W-sw}" height="${H-sw}" rx="26" fill="none" stroke="#fff" stroke-opacity="${[0,0,.5,.6,.7,.8,.9][lv]}" stroke-width="${sw}" stroke-dasharray="${d.join(" ")}" stroke-dashoffset="${Math.round(r(0,500))}" stroke-linecap="round" filter="url(#wb2)"/>`}
  if(lv===6)s+=`<rect x="3" y="3" width="${W-6}" height="${H-6}" rx="26" fill="none" stroke="#2a2016" stroke-opacity=".5" stroke-width="10" stroke-dasharray="${Math.round(r(60,160))} ${Math.round(r(80,200))}" filter="url(#wb1)"/>`;
  if(lv>=3)s+=`<rect width="${W}" height="${H}" fill="#fff" fill-opacity="${[0,0,0,.04,.07,.1,.14][lv]}"/>`;
  const ns=[0,0,0,3,6,10,16][lv];for(let i=0;i<ns;i++){const x=r(30,W-30),y=r(30,H-30),a=r(0,Math.PI),L=r(50,lv>=5?320:200);
